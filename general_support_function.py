@@ -162,3 +162,57 @@ def save_and_compare_pic(name, size_of_window, scan_position, scan_size):
     outfile = name
     temp_res = np.array(result_list)
     np.save(outfile, np.array(result_list))
+
+
+def get_key_board_states(key_states):
+    key_new_states = {}
+
+    for i in range(0xFF):
+        key_new_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
+
+        if key_new_states[str(i)] != key_states[str(i)]:
+            key_states[str(i)] = key_new_states[str(i)]
+            print(key_new_states[str(i)])
+
+            this_key = [key for key, value in VK_CODE.items() if value == i][0]
+
+            if key_states[str(i)] < 0:
+                if this_key in VK_CODE.keys():
+                    print(this_key + " pressed")
+                else:
+                    print('Unknown' + ' pressed')
+            else:
+                if this_key in VK_CODE.keys():
+                    print(this_key + " released")
+                else:
+                    print('Unknown' + ' released')
+
+
+if __name__ == "__main__":
+    key_states = {}
+    key_new_states = {}
+
+    for i in range(0xFF):
+        key_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
+        key_new_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
+
+    while True:
+        for i in range(0xFF):
+            key_new_states[str(i)] = win32api.GetKeyState(i)  # Refresh key states
+
+            if key_new_states[str(i)] != key_states[str(i)]:
+                key_states[str(i)] = key_new_states[str(i)]
+                print(key_new_states[str(i)])
+
+                this_key = [key for key, value in VK_CODE.items() if value == i][0]
+
+                if key_states[str(i)] < 0:
+                    if this_key in VK_CODE.keys():
+                        print(this_key + " pressed")
+                    else:
+                        print('Unknown' + ' pressed')
+                else:
+                    if this_key in VK_CODE.keys():
+                        print(this_key + " released")
+                    else:
+                        print('Unknown' + ' released')

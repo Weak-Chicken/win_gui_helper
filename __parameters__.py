@@ -1,4 +1,6 @@
-VK_CODE = {'backspace': 0x08,
+VK_CODE = {'mouse_left': 0x01,
+           'mouse_right': 0x02,
+           'backspace': 0x08,
            'tab': 0x09,
            'clear': 0x0C,
            'enter': 0x0D,
