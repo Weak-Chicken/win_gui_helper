@@ -164,37 +164,15 @@ def save_and_compare_pic(name, size_of_window, scan_position, scan_size):
     np.save(outfile, np.array(result_list))
 
 
-def get_key_board_states(key_states):
-    key_new_states = {}
-
-    for i in range(0xFF):
-        key_new_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
-
-        if key_new_states[str(i)] != key_states[str(i)]:
-            key_states[str(i)] = key_new_states[str(i)]
-            print(key_new_states[str(i)])
-
-            this_key = [key for key, value in VK_CODE.items() if value == i][0]
-
-            if key_states[str(i)] < 0:
-                if this_key in VK_CODE.keys():
-                    print(this_key + " pressed")
-                else:
-                    print('Unknown' + ' pressed')
-            else:
-                if this_key in VK_CODE.keys():
-                    print(this_key + " released")
-                else:
-                    print('Unknown' + ' released')
-
-
-if __name__ == "__main__":
+def key_board_recorder():
     key_states = {}
     key_new_states = {}
+    key_timers = {}
 
     for i in range(0xFF):
         key_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
         key_new_states[str(i)] = win32api.GetKeyState(i)  # Button down = 0 or 1. Button up = -127 or -128
+        key_timers[str(i)] = 0
 
     while True:
         for i in range(0xFF):
@@ -202,17 +180,40 @@ if __name__ == "__main__":
 
             if key_new_states[str(i)] != key_states[str(i)]:
                 key_states[str(i)] = key_new_states[str(i)]
-                print(key_new_states[str(i)])
 
                 this_key = [key for key, value in VK_CODE.items() if value == i][0]
 
                 if key_states[str(i)] < 0:
                     if this_key in VK_CODE.keys():
-                        print(this_key + " pressed")
+                        temp_res = "Pressed," + this_key
+                        if i == 0x01 or i == 0x00:
+                            _, _, cursor_pos = win32gui.GetCursorInfo()
+                            temp_res += "," + str(cursor_pos)
+                            with open("running_record", "a") as file:
+                                file.write(temp_res)
+                                file.write("\n")
+                        else:
+                            with open("running_record", "a") as file:
+                                file.write(temp_res)
+                                file.write("\n")
+                        key_timers[str(i)] = time.time()
                     else:
                         print('Unknown' + ' pressed')
                 else:
                     if this_key in VK_CODE.keys():
-                        print(this_key + " released")
+                        temp_res = "Released," + this_key + "," + str((time.time() - key_timers[str(i)]))
+                        if i == 0x01 or i == 0x00:
+                            _, _, cursor_pos = win32gui.GetCursorInfo()
+                            temp_res += "," + str(cursor_pos)
+                            with open("running_record", "a") as file:
+                                file.write(temp_res)
+                                file.write("\n")
+                        else:
+                            with open("running_record", "a") as file:
+                                file.write(temp_res)
+                                file.write("\n")
                     else:
                         print('Unknown' + ' released')
+
+if __name__ == "__main__":
+    key_board_recorder()
