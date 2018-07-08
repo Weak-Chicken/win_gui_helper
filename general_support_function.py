@@ -181,7 +181,9 @@ def key_board_recorder():
             if key_new_states[str(i)] != key_states[str(i)]:
                 key_states[str(i)] = key_new_states[str(i)]
 
-                this_key = [key for key, value in VK_CODE.items() if value == i][0]
+                this_key = [key for key, value in VK_CODE.items() if value == i]
+                if len(this_key) > 0:
+                    this_key = this_key[0]
 
                 if key_states[str(i)] < 0:
                     if this_key in VK_CODE.keys():
@@ -215,5 +217,36 @@ def key_board_recorder():
                     else:
                         print('Unknown' + ' released')
 
+
+def reproduce_operation_from_file(path):
+    key_timers = {}
+
+    for i in VK_CODE.keys():
+        key_timers[i] = 0
+
+    with open(path, "r") as file:
+        all_records = file.read()
+
+    records_split = all_records.split("\n")
+
+    for record in range(len(records_split)):
+        command = records_split[record].split(",")
+
+        if command[0] == "Pressed":
+            if command[1] == "mouse_left" or command[1] == "mouse_right":
+
+            else:
+                win32api.keybd_event(VK_CODE[command[1]], 0, 0, 0)
+                key_timers[command[1]] = time.time()
+        elif command[0] == "Released":
+            if command[1] == "mouse_left" or command[1] == "mouse_right":
+                
+            else:
+                if time.time() - key_timers[command[1]] > float(command[2]):
+                    win32api.keybd_event(VK_CODE[command[1]], 0, win32con.KEYEVENTF_KEYUP, 0)
+        else:
+            print("Unknown command detected, original commend is", ":", records_split[record])
+
 if __name__ == "__main__":
-    key_board_recorder()
+    # key_board_recorder()
+    reproduce_operation_from_file("running_record")
