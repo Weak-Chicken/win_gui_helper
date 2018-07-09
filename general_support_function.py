@@ -235,13 +235,13 @@ def reproduce_operation_from_file(path):
 
         if command[0] == "Pressed":
             if command[1] == "mouse_left" or command[1] == "mouse_right":
-
+                pass
             else:
                 win32api.keybd_event(VK_CODE[command[1]], 0, 0, 0)
                 key_timers[command[1]] = time.time()
         elif command[0] == "Released":
             if command[1] == "mouse_left" or command[1] == "mouse_right":
-
+                pass
             else:
                 if time.time() - key_timers[command[1]] > float(command[2]):
                     win32api.keybd_event(VK_CODE[command[1]], 0, win32con.KEYEVENTF_KEYUP, 0)
@@ -252,13 +252,13 @@ def reproduce_operation_from_file(path):
 
         for record in to_be_released_buttons:
             if command[1] == "mouse_left" or command[1] == "mouse_right":
-
+                pass
             else:
                 if time.time() - key_timers[command[1]] > float(command[2]):
                     win32api.keybd_event(VK_CODE[command[1]], 0, win32con.KEYEVENTF_KEYUP, 0)
                 else:
                     to_be_released_buttons.append(record)
-    while(len)
+    # while(len)
 
 if __name__ == "__main__":
     # key_board_recorder()
