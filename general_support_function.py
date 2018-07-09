@@ -220,6 +220,7 @@ def key_board_recorder():
 
 def reproduce_operation_from_file(path):
     key_timers = {}
+    to_be_released_buttons = []
 
     for i in VK_CODE.keys():
         key_timers[i] = 0
@@ -240,12 +241,24 @@ def reproduce_operation_from_file(path):
                 key_timers[command[1]] = time.time()
         elif command[0] == "Released":
             if command[1] == "mouse_left" or command[1] == "mouse_right":
-                
+
             else:
                 if time.time() - key_timers[command[1]] > float(command[2]):
                     win32api.keybd_event(VK_CODE[command[1]], 0, win32con.KEYEVENTF_KEYUP, 0)
+                else:
+                    to_be_released_buttons.append(record)
         else:
             print("Unknown command detected, original commend is", ":", records_split[record])
+
+        for record in to_be_released_buttons:
+            if command[1] == "mouse_left" or command[1] == "mouse_right":
+
+            else:
+                if time.time() - key_timers[command[1]] > float(command[2]):
+                    win32api.keybd_event(VK_CODE[command[1]], 0, win32con.KEYEVENTF_KEYUP, 0)
+                else:
+                    to_be_released_buttons.append(record)
+    while(len)
 
 if __name__ == "__main__":
     # key_board_recorder()
