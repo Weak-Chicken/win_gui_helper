@@ -15,6 +15,7 @@ from __parameters__ import VK_CODE
 import win32clipboard
 import random
 
+# Set the screenshot based on the DPI of the client
 user32 = windll.user32
 user32.SetProcessDPIAware()
 
@@ -53,7 +54,7 @@ def double_click(x, y):
 
 def press(key):
     """
-    Press a certain key
+    Press a certain key on keyboard
 
     :param key: the key string
     :type: string
@@ -66,7 +67,7 @@ def press(key):
 
 def press_two(key1, key2):
     """
-    Press two keys at the same time. Which could be used to press combination like ctrl + c
+    Press two keys on keyboard at the same time. Which could be used to press combination like ctrl + c
 
     :param key1: the key 1 string
     :param key2: the key 2 string
@@ -81,6 +82,12 @@ def press_two(key1, key2):
 
 
 def get_clipboard():
+    """
+    Get the text in the clipboard
+
+    :return: the text in clipboard
+    :type: str
+    """
     win32clipboard.OpenClipboard()
     data = win32clipboard.GetClipboardData()
     win32clipboard.CloseClipboard()
@@ -88,6 +95,13 @@ def get_clipboard():
 
 
 def set_clipboard(text):
+    """
+    Set the clipboard to certain text
+
+    :param text: the text to be set to clipboard
+    :type: str
+    :return: None
+    """
     win32clipboard.OpenClipboard()
     win32clipboard.EmptyClipboard()
     win32clipboard.SetClipboardText(text, win32clipboard.CF_UNICODETEXT)
@@ -260,6 +274,10 @@ def reproduce_operation_from_file(path):
                     to_be_released_buttons.append(record)
     # while(len)
 
+
 if __name__ == "__main__":
     # key_board_recorder()
-    reproduce_operation_from_file("running_record")
+    # reproduce_operation_from_file("running_record")
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
