@@ -11,7 +11,7 @@ import win32con
 from ctypes import windll
 
 import numpy as np
-from __parameters__ import VK_CODE
+from .__parameters__ import VK_CODE
 import win32clipboard
 import random
 
