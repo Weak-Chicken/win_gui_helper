@@ -1,27 +1,8 @@
-from multiprocessing import Process
-import os
-
-# Implement your main function here
-
-
 """
-The following is the example to do parallel programming in python. Please be careful that the parallel control shall be
-always used in your program later implemented.
+write a template here. Like Django's manage.py file, which can be used as an entrance to mange the project files.
+At current stage, build "project template" in this file and provide a way for users to initialize their project.
 
-Delete the example when you are ready to go.
+Maybe also consider to add an inspection/benchmark here
 """
-def info(title):
-    print(title)
-    print('module name:', __name__)
-    print('parent process:', os.getppid())
-    print('process id:', os.getpid())
 
-def f(name):
-    info('function f')
-    print('hello', name)
-
-if __name__ == '__main__':
-    info('main line')
-    p = Process(target=f, args=('bob',))
-    p.start()
-    p.join()
+# TODO

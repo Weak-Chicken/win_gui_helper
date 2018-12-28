@@ -11,14 +11,13 @@ import win32con
 from ctypes import windll
 
 import numpy as np
-from __parameters__ import VK_CODE
+from base_methods.__parameters__ import VK_CODE
 import win32clipboard
 import random
 
 
 def click(x, y):
-    """
-    Give a click on the screen at position (x, y)
+    """Give a click on the screen at position (x, y)
 
     :param x: x-axis
     :param y: y-axis
@@ -31,8 +30,7 @@ def click(x, y):
 
 
 def right_click(x, y):
-    """
-    Give a right-click on the screen at position (x, y)
+    """Give a right click on the screen at position (x, y)
 
     :param x: x-axis
     :param y: y-axis
@@ -45,8 +43,7 @@ def right_click(x, y):
 
 
 def double_click(x, y):
-    """
-    Give a click on the screen at position (x, y)
+    """Give a double clicks on the screen at position (x, y)
 
     :param x: x-axis
     :param y: y-axis
@@ -62,21 +59,22 @@ def double_click(x, y):
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
 
-def click_in_list(click_list, time_list):
-    """
-    Click a sequence mouse buttons by the time intervals given in time_list.
+def click_in_list(click_list, time_list, press_time_list):
+    """Click a sequence mouse buttons by the time intervals given in time_list.
+
     The size of click_list should be the size of time_list plus 1. i.e. len(click_list) = len(time_list) + 1
+
     :param click_list: the list contains mouse buttons to be clicked. Which could be either 'left' or 'right'.
     :type: list
     :param time_list: the time interval between keys.
     :type: list
     :return: None
     """
-    pass
+    # TODO
+
 
 def press(key):
-    """
-    Press a certain key on keyboard
+    """Press a certain key on keyboard
 
     :param key: the key string
     :type: string
@@ -88,8 +86,9 @@ def press(key):
 
 
 def press_two(key1, key2):
-    """
-    Press two keys on keyboard at the same time. Which could be used to press combination like ctrl + c
+    """Press two keys on keyboard at the same time.
+
+    Which could be used to press shortcuts combination such as ctrl + c
 
     :param key1: the key 1 string
     :param key2: the key 2 string
@@ -103,20 +102,21 @@ def press_two(key1, key2):
     win32api.keybd_event(key_code2, 0, win32con.KEYEVENTF_KEYUP, 0)
 
 
-def press_in_list(press_list, time_list):
-    """
-    Press a sequence key buttons by the time intervals given in time_list.
+def press_in_list(press_list, time_list, press_time_list):
+    """Press a sequence key buttons by the time intervals given in time_list.
+
     The size of click_list should be the size of time_list plus 1. i.e. len(press_list) = len(time_list) + 1
+
     :param press_list: the list contains mouse buttons to be clicked. Which should be the key names.
     :type: list
     :param time_list: the time interval between keys.
     :type: list
+    :return: None
     """
-    pass
+    # TODO
 
 def set_clipboard(text):
-    """
-    Set the clipboard to certain text
+    """Set the clipboard to certain text
 
     :param text: the text to be set to clipboard
     :type: str
