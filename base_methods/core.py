@@ -6,6 +6,7 @@ import numpy as np
 import base_methods.actions_based_on_pywin32 as ac
 import base_methods.perceptions_based_on_pywin32 as pe
 import time
+from base_methods.__parameters__ import FLAG_ERROR_NAN_COORDINATE
 
 
 def _reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
@@ -153,22 +154,21 @@ def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_ti
                 print("Error: Given mode is not supported currently")
 
 
-def _move_mouse_to_match_pic_core():
-    """Used to support 'move_mouse' related functions. Details could be found in these functions.
-    """
-
-
-def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_pos, full_screen=False):
+def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_pos, full_screen=False, find_mode=False,
+                                        threshold=0.5):
     """Move mouse in a line and search a specific picture while moving mouse
 
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
     buttons/amines, we need to detect the picture while moving the mouse. The search_box is calculated based on the
     position of the mouse. It will suppose cursor is at right bottom of the searching box and calculate the search area.
-    The shape of the search box will be the same to the shape of target picture If the full_screen is set to True, the
+    The shape of the search box will be the same to the shape of target picture. If the full_screen is set to True, the
     search_box will be disabled and whole screen picture will be searched.
 
     This method will return the similar ratio between the search box and the target picture. So be careful when using
     full_screen parameter. It might case the ratio very low.
+
+    The find mode is made for other function. When find mode is on, the threshold will be considered. Once the FIRST
+    point satisfies the threshold is found, the point will be given and the function will be stopped.
 
     :param target_pic: the picture to be found in the area
     :type: PIL image file
@@ -178,8 +178,12 @@ def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_
     :type: (x, y)
     :param full_screen: directly search the whole screen
     :type: Boolean
-    :return: ALL similar ratios between the search box and the target picture
-    :rtype: list
+    :param find_mode: whether to use find mode
+    :type: Boolean
+    :param threshold: the threshold used to define 'find'
+    :type: double
+    :return: ALL similar ratios between the search box and the target picture / Find result (point and rate)
+    :rtype: list / (coordinate_x, coordinate_y, similar_rate) (Depends on 'find mode' controller)
     """
     # Init
     start_x, start_y = mouse_start_pos
@@ -199,7 +203,7 @@ def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_
     bottom = start_y
 
     # Start here
-    while start_x < stop_x:
+    while start_x < stop_x or start_y < stop_y:
         left = start_x - size_x
         right = start_x
         if left < 0:
@@ -222,13 +226,16 @@ def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_
                     continue
             screen_shot = np.array(screen_shot)
 
-            results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
-                pe.comparing_two_pictures(screen_shot, target_pic)
+            temp_res = pe.comparing_two_pictures(screen_shot, target_pic)
+            if find_mode:
+                if temp_res > threshold:
+                    return start_x, start_y, temp_res
+            else:
+                results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
+                    temp_res
 
             start_y += 1
 
-            if start_x < stop_x:
-                break
         win32api.SetCursorPos((start_x, start_y))
 
         if full_screen:
@@ -241,21 +248,26 @@ def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_
                 continue
         screen_shot = np.array(screen_shot)
 
-        results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
-            pe.comparing_two_pictures(screen_shot, target_pic)
+        temp_res = pe.comparing_two_pictures(screen_shot, target_pic)
+        if find_mode:
+            if temp_res > threshold:
+                return start_x, start_y, temp_res
+        else:
+            results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
+                temp_res
 
         start_x += 1
 
     return results_list
 
 
-def move_mouse_to_match_pic(target_pic, search_area, mouse_start_pos, mouse_stop_pos, full_screen=False):
+def move_mouse_to_match_pic(target_pic, mouse_start_pos, mouse_stop_pos, full_screen=False):
     """Move mouse in a line and search a specific picture while moving mouse
 
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
-    buttons/amines, we need to detect the picture while moving the mouse. The search_box should contain the
-    size of the search box. It is calculated based on the position of the mouse. It will suppose cursor is at right
-    bottom of the searching box and calculate the search area. If the full_screen is set to True, the
+    buttons/amines, we need to detect the picture while moving the mouse. The search_box is calculated based on the
+    position of the cursor. It will suppose cursor is at right bottom of the searching box and calculate the search area.
+    The shape of the search box will be the same to the shape of target picture. If the full_screen is set to True, the
     search_box will be disabled and whole screen picture will be searched.
 
     This method will return the similar ratio between the search box and the target picture. So be careful when using
@@ -263,8 +275,6 @@ def move_mouse_to_match_pic(target_pic, search_area, mouse_start_pos, mouse_stop
 
     :param target_pic: the picture to be found in the area
     :type: PIL image file
-    :param search_area: the area to be searched. Based on the position of the mouse
-    :type:(size_x, size_y)
     :param mouse_start_pos: the position where mouse start to move
     :type: (x, y)
     :param mouse_stop_pos: the position where mouse stop to move
@@ -274,7 +284,9 @@ def move_mouse_to_match_pic(target_pic, search_area, mouse_start_pos, mouse_stop
     :return: the highest similar ratio between the search box and the target picture
     :rtype: double
     """
-    # TODO
+    results = move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_pos, full_screen)
+
+    return sorted(results.items(), key=lambda x: x[1], reverse=True)[0]
 
 
 def move_mouse_to_detect_change(target_ratio, search_area, mouse_start_pos, mouse_stop_pos, full_screen=False):
@@ -283,34 +295,101 @@ def move_mouse_to_detect_change(target_ratio, search_area, mouse_start_pos, mous
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
     buttons/amines, we need to detect the changes while moving the mouse. The target ratio is the threshold to stop
     moving mouse. Once the changing ratio is higher than given target ratio, the method will return the final changing
-    ratio. The search_box should contain the size of the search box. It is calculated based on the position
-    of the mouse. It will suppose cursor is at right bottom of the searching box and calculate the search area. If the
-    full_screen is set to True, the search_box will be disabled and whole screen picture will be searched.
+    ratio. The search box is calculated based on the position of the cursor. It will suppose cursor is at right bottom of
+    the searching box and calculate the search area. The shape of the search box will be the same to the shape of target
+    picture. If the full_screen is set to True, the search_box will be disabled and whole screen picture will be searched.
 
     This method will return the change ratio inside the search box. So be careful when using full_screen parameter. It
     might consider something totally not related but changed stuffs.
 
     :param target_ratio: the threshold to stop searching
     :type: double
-    :param search_area: the area to be searched. Based on the position of the mouse
-    :type:(size_x, size_y)
+    :param search_area: the area to be searched, which is defined based on the position of cursor
+    :type: (x, y)
     :param mouse_start_pos: the position where mouse start to move
     :type: (x, y)
     :param mouse_stop_pos: the position where mouse stop to move
     :type: (x, y)
     :param full_screen: directly search the whole screen
     :type: Boolean
-    :return: the change ratio if anything inside the search box has changed
-    :rtype: double
+    :return: the similarity ratio if anything inside the search box has changed and the cursor stopped position
+    :rtype: (coordinate_x, coordinate_y, similar_rate)
     """
-    # TODO
+    # Init
+    start_x, start_y = mouse_start_pos
+    stop_x, stop_y = mouse_stop_pos
+    start_x = int(start_x)
+    start_y = int(start_y)
+    stop_x = int(stop_x)
+    stop_y = int(stop_y)
+
+    screen_shot = pe.ImageGrab.grab()
+    screen_shot = np.array(screen_shot)
+    (size_x, size_y) = search_area
+
+    top = start_y - size_y
+    if top < 0:
+        return 0
+    bottom = start_y
+
+    # Start
+    while start_x < stop_x or start_y < stop_y:
+        left = start_x - size_x
+        right = start_x
+        if left < 0:
+            return FLAG_ERROR_NAN_COORDINATE, FLAG_ERROR_NAN_COORDINATE, 0
+
+        while start_y < stop_y:
+            if full_screen:
+                search_window_1 = screen_shot
+            else:
+                search_window_1 = screen_shot[top: bottom, left: right]
+            win32api.SetCursorPos((start_x, start_y))
+            screen_shot = pe.ImageGrab.grab()
+            screen_shot = np.array(screen_shot)
+            if full_screen:
+                search_window_2 = screen_shot
+            else:
+                search_window_2 = screen_shot[top: bottom, left: right]
+
+            # print(1 - pe.comparing_two_pictures(search_window_1, search_window_2))
+            if (1 - pe.comparing_two_pictures(search_window_1, search_window_2)) >= target_ratio:
+                return start_x, start_y, pe.comparing_two_pictures(search_window_1, search_window_2)
+
+            start_y += 1
+
+        top = start_y - size_y
+        if top < 0:
+            return FLAG_ERROR_NAN_COORDINATE, FLAG_ERROR_NAN_COORDINATE, 0
+        bottom = start_y
+
+        # I think it is repeated here
+        if full_screen:
+            search_window_1 = screen_shot
+        else:
+            search_window_1 = screen_shot[top: bottom, left: right]
+        win32api.SetCursorPos((start_x, start_y))
+        screen_shot = pe.ImageGrab.grab()
+        screen_shot = np.array(screen_shot)
+        if full_screen:
+            search_window_2 = screen_shot
+        else:
+            search_window_2 = screen_shot[top: bottom, left: right]
+
+        # print(1 - pe.comparing_two_pictures(search_window_1, search_window_2))
+        if (1 - pe.comparing_two_pictures(search_window_1, search_window_2)) >= target_ratio:
+            return start_x, start_y, pe.comparing_two_pictures(search_window_1, search_window_2)
+
+        start_x += 1
+
+    return FLAG_ERROR_NAN_COORDINATE, FLAG_ERROR_NAN_COORDINATE, 0
 
 
-def move_mouse_to_detect_change_only_two_points(search_area, mouse_start_pos, next_point='left', full_screen=False):
+def move_mouse_to_detect_change_only_two_points(search_area, direction='left', full_screen=False):
     """Move mouse to next point and detect changes
 
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
-    buttons/amines, we need to detect the changes while moving the mouse. And sometimes we only need the difference
+    buttons/amines, we need to detect the changes while moving the cursor. And sometimes we only need the difference
     between two points. This method will compare the picture in the search box at current cursor position. Then, it
     will move the cursor to either left/right/up/down one pixel and compare the picture after moving the cursor.
 
@@ -318,18 +397,35 @@ def move_mouse_to_detect_change_only_two_points(search_area, mouse_start_pos, ne
     box position. If full_screen is set to True, the search_box parameter will be ignored and it will compare across
     the whole screen.
 
-    :param search_area: the area to be searched. Based on the position of the mouse
-    :type:(size_x, size_y)
-    :param mouse_start_pos: the position where mouse start to move
+    :param search_area: the area to be searched, which is defined based on the position of cursor
     :type: (x, y)
-    :param next_point: where to move the cursor
+    :param direction: where to move the cursor
     :type: str, choose from left/right/up/down
     :param full_screen: directly search the whole screen
     :type: Boolean
-    :return: the change ratio if anything inside the search box has changed
+    :return: the similarity ratio if anything inside the search box has changed
     :rtype: double
     """
-    # TODO
+    _, _, mouse_start_pos = win32gui.GetCursorInfo()
+    mouse_stop_pos = list(mouse_start_pos)
+    if direction == "left":
+        mouse_stop_pos[0] -= 1
+    elif direction == "right":
+        mouse_stop_pos[0] += 1
+    elif direction == "up":
+        mouse_stop_pos[1] -= 1
+    elif direction == "down":
+        mouse_stop_pos[1] += 1
+    else:
+        raise ValueError("Given direction {0} is not defined".format(direction))
+
+    res = move_mouse_to_detect_change(0, search_area, mouse_start_pos, mouse_stop_pos, full_screen)
+    win32api.SetCursorPos(mouse_stop_pos)
+
+    if res[0] != FLAG_ERROR_NAN_COORDINATE and res[1] != FLAG_ERROR_NAN_COORDINATE:
+        return res[2]
+    else:
+        return None
 
 
 def click_here():
@@ -337,10 +433,11 @@ def click_here():
 
     :return: None
     """
-    # TODO
+    _, _, mouse_pos = win32gui.GetCursorInfo()
+    ac.click(mouse_pos[0], mouse_pos[1])
 
 
-def search_given_picture_in_area_and_move_mouse(target_pic, search_area, full_screen=False):
+def search_given_picture_in_area_and_move_mouse_to(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture and move cursor to there if the picture is found
 
     This function will search in an area to find the target picture. If any part in this aera is EXACTLY the same with
@@ -357,16 +454,33 @@ def search_given_picture_in_area_and_move_mouse(target_pic, search_area, full_sc
     :return: whether the picture is in the given area
     :rtype: Boolean
     """
-    # TODO
+    res = pe.search_given_picture_in_area_and_give_pos(target_pic, search_area, full_screen)
+    if res is None:
+        return False
+    else:
+        ((left, top), (right, bottom)) = res
+        win32api.SetCursorPos((int((right - left) / 2 + left), int((bottom - top) / 2 + top)))
+        return True
 
 
 if __name__ == "__main__":
     # print(reach_the_bottom(((560, 151), (1896, 717)), 5))
     # scroll_to_the_end(((560, 151), (1896, 717)), "up", "keyboard")
 
-    target = pe.Image.open("test.png")
-    size_x = 100
-    size_y = 94
-    res = move_mouse_to_match_pic_res_in_list(target, (100, 94), (200, 94))
-    print(res)
-    print(len(res))
+    # target = pe.Image.open("test.png")
+    # size_x = 100
+    # size_y = 94
+    # res = move_mouse_to_match_pic_res_in_list(target, (100, 94), (100, 294), find_mode=False, threshold=0.99)
+    # res = move_mouse_to_match_pic(target, (100, 94), (200, 94))
+    # print(res)
+    # print(len(res))
+
+    # print(move_mouse_to_detect_change(0.4, (20, 20), (20, 70), (300, 70), full_screen=False))
+
+    # for i in range(200):
+    #     print(move_mouse_to_detect_change_only_two_points((20, 20), "right"))
+
+    # click_here()
+
+    target = pe.Image.open("test_button.png")
+    print(search_given_picture_in_area_and_move_mouse_to(target, ((0, 0), (100, 300)), full_screen=True))

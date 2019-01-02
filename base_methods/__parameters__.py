@@ -1,3 +1,7 @@
+# Flags
+FLAG_ERROR_NAN_COORDINATE = -100
+
+# VK CODE
 VK_CODE = {'mouse_left': 0x01,
            'mouse_right': 0x02,
            'backspace': 0x08,

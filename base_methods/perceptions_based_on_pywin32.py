@@ -104,6 +104,8 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
 
     # TODO Optimize this function. It now needs 3.7s to scan 1920*1080 screen
 
+    # TODO Modify this function to threshold version
+
 
 def search_given_picture_in_area(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture

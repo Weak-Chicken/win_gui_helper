@@ -25,7 +25,7 @@ def download_one_line():  # main function
         if multiple_episode:
             click_all_select_button()
         # Then Download page will be shown
-        click_download_comfirmation_button()
+        click_download_confirmation_button()
         go_back_to_upper_page()
 
 
@@ -48,7 +48,7 @@ def click_into_one_element():
 
 def click_download_button():
     # TODO
-    if gh.complexac.search_given_picture_in_area_and_move_mouse(download_button):
+    if gh.complexac.search_given_picture_in_area_and_move_mouse_to(download_button):
         gh.complexac.click_here()
 
 
@@ -62,14 +62,14 @@ def multiple_episode():
 
 def click_all_select_button():
     # TODO
-    if gh.complexac.search_given_picture_in_area_and_move_mouse(select_all_button):
+    if gh.complexac.search_given_picture_in_area_and_move_mouse_to(select_all_button):
         gh.complexac.click_here()
 
 
-def click_download_comfirmation_button():
+def click_download_confirmation_button():
     # TODO
     if gh.basicpe.search_given_picture_in_area(download_page):
-        if gh.complexac.search_given_picture_in_area_and_move_mouse(download_comfirmation_button):
+        if gh.complexac.search_given_picture_in_area_and_move_mouse_to(download_comfirmation_button):
             gh.complexac.click_here()
 
 
