@@ -1,9 +1,14 @@
+import win32api
+import win32gui
+import win32ui
+import numpy as np
+
 import base_methods.actions_based_on_pywin32 as ac
 import base_methods.perceptions_based_on_pywin32 as pe
 import time
 
 
-def reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
+def _reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
     """Used to support function reach_the_top and reach_the_bottom. Details could be found in these two functions.
 
     :param scroll_window: the scrollable window position
@@ -84,7 +89,7 @@ def reach_the_top(scroll_window, scan_length, try_time=5):
     :return: whether the current page is at the top
     :rtype: Boolean
     """
-    return reach_the_end_core(scroll_window, scan_length, "up", try_time)
+    return _reach_the_end_core(scroll_window, scan_length, "up", try_time)
 
 
 def reach_the_bottom(scroll_window, scan_length, try_time=5):
@@ -106,7 +111,7 @@ def reach_the_bottom(scroll_window, scan_length, try_time=5):
     :return: whether the current page is at the bottom
     :rtype: Boolean
     """
-    return reach_the_end_core(scroll_window, scan_length, "down", try_time)
+    return _reach_the_end_core(scroll_window, scan_length, "down", try_time)
 
 
 def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_time=3):
@@ -133,7 +138,7 @@ def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_ti
     """
     step = 20
     for i in range(max_wait_time):
-        while not reach_the_end_core(scroll_window, 8, direction):
+        while not _reach_the_end_core(scroll_window, 8, direction):
             if mode == "mouse_wheel":
                 for j in range(step):
                     ac.scroll(direction)
@@ -148,22 +153,25 @@ def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_ti
                 print("Error: Given mode is not supported currently")
 
 
-def move_mouse_to_match_pic_res_in_list(target_pic, search_area, mouse_start_pos, mouse_stop_pos, full_screen=False):
+def _move_mouse_to_match_pic_core():
+    """Used to support 'move_mouse' related functions. Details could be found in these functions.
+    """
+
+
+def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_pos, full_screen=False):
     """Move mouse in a line and search a specific picture while moving mouse
 
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
-    buttons/amines, we need to detect the picture while moving the mouse. The search_box should contain the
-    size of the search box. It is calculated based on the position of the mouse. It will suppose cursor is at right
-    bottom of the searching box and calculate the search area. If the full_screen is set to True, the search_box will be
-    disabled and whole screen picture will be searched.
+    buttons/amines, we need to detect the picture while moving the mouse. The search_box is calculated based on the
+    position of the mouse. It will suppose cursor is at right bottom of the searching box and calculate the search area.
+    The shape of the search box will be the same to the shape of target picture If the full_screen is set to True, the
+    search_box will be disabled and whole screen picture will be searched.
 
     This method will return the similar ratio between the search box and the target picture. So be careful when using
     full_screen parameter. It might case the ratio very low.
 
     :param target_pic: the picture to be found in the area
     :type: PIL image file
-    :param search_area: the area to be searched. Based on the position of the mouse
-    :type:(size_x, size_y)
     :param mouse_start_pos: the position where mouse start to move
     :type: (x, y)
     :param mouse_stop_pos: the position where mouse stop to move
@@ -173,7 +181,72 @@ def move_mouse_to_match_pic_res_in_list(target_pic, search_area, mouse_start_pos
     :return: ALL similar ratios between the search box and the target picture
     :rtype: list
     """
-    # TODO
+    # Init
+    start_x, start_y = mouse_start_pos
+    stop_x, stop_y = mouse_stop_pos
+    start_x = int(start_x)
+    start_y = int(start_y)
+    stop_x = int(stop_x)
+    stop_y = int(stop_y)
+
+    (size_y, size_x) = np.array(target_pic).shape[:2]
+
+    results_list = {}
+    top = start_y - size_y
+    if top < 0:
+        raise ValueError("""Search box cannot be deployed in current mouse start position! Need more room on y axis
+        you need {0} pixels available in y axis. However only {1} pixels available.""".format(size_y, start_y))
+    bottom = start_y
+
+    # Start here
+    while start_x < stop_x:
+        left = start_x - size_x
+        right = start_x
+        if left < 0:
+            raise ValueError("""Search box cannot be deployed in current mouse start position! Need more room on x axis
+        you need {0} pixels available in x axis. However only {1} pixels available.""".format(size_x, start_x))
+
+        while start_y < stop_y:
+            top = start_y - size_y
+            bottom = start_y
+
+            win32api.SetCursorPos((start_x, start_y))
+
+            if full_screen:
+                screen_shot = pe.ImageGrab.grab()
+            else:
+                try:
+                    screen_shot = pe.screenshot_certain_place(((left, top), (right, bottom)))
+                except ValueError:
+                    start_y += 1
+                    continue
+            screen_shot = np.array(screen_shot)
+
+            results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
+                pe.comparing_two_pictures(screen_shot, target_pic)
+
+            start_y += 1
+
+            if start_x < stop_x:
+                break
+        win32api.SetCursorPos((start_x, start_y))
+
+        if full_screen:
+            screen_shot = pe.ImageGrab.grab()
+        else:
+            try:
+                screen_shot = pe.screenshot_certain_place(((left, top), (right, bottom)))
+            except ValueError:
+                start_x += 1
+                continue
+        screen_shot = np.array(screen_shot)
+
+        results_list["((" + str(left) + "," + str(top) + "),(" + str(right) + "," + str(bottom) + "))"] = \
+            pe.comparing_two_pictures(screen_shot, target_pic)
+
+        start_x += 1
+
+    return results_list
 
 
 def move_mouse_to_match_pic(target_pic, search_area, mouse_start_pos, mouse_stop_pos, full_screen=False):
@@ -290,9 +363,10 @@ def search_given_picture_in_area_and_move_mouse(target_pic, search_area, full_sc
 if __name__ == "__main__":
     # print(reach_the_bottom(((560, 151), (1896, 717)), 5))
     # scroll_to_the_end(((560, 151), (1896, 717)), "up", "keyboard")
+
     target = pe.Image.open("test.png")
-    offset_x =
-    offset_y =
-    size_x =
-    size_y =
-    move_mouse_to_match_pic_res_in_list(target, ((offset_x, offset_y), (size_x, size_y)), (0, 93), (1920, 93))
+    size_x = 100
+    size_y = 94
+    res = move_mouse_to_match_pic_res_in_list(target, (100, 94), (200, 94))
+    print(res)
+    print(len(res))

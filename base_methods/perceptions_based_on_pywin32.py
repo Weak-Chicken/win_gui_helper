@@ -129,7 +129,7 @@ def search_given_picture_in_area(target_pic, search_area, full_screen=False):
 
 
 def comparing_two_pictures(image_1, image_2):
-    """Comparing tow pictures and give their similarity.
+    """Comparing two pictures and give their similarity.
 
     :param image_1: the picture to be compared
     :type: PIL image file
@@ -159,6 +159,17 @@ def screenshot_certain_place(screenshot_window):
     screen_shot = np.array(screen_shot)
 
     ((left, top), (right, bottom)) = screenshot_window
+
+    if left < 0:
+        left = 0
+    if top < 0:
+        top = 0
+
+    if right <= left:
+        raise ValueError("Right coordinates should be larger than left")
+    if bottom <= top:
+        raise ValueError("Bottom coordinates should be larger than top")
+
     result_np = screen_shot[top: bottom, left: right]
 
     return Image.fromarray(result_np)
