@@ -2,16 +2,30 @@ import base_methods.actions_based_on_pywin32 as ac
 import base_methods.perceptions_based_on_pywin32 as pe
 
 
-def reach_the_top():
-    """Return whether the current page is at the top.
+def reach_the_top(scroll_window, scan_length, try_time=5):
+    """Return whether the current page is at the top. The user needs to illustrate where is the scrollable window and
+    how many pixels down.
 
+    The function provide the results based on the following operation: first, it tries to scroll up. If the page is then
+    changed, which means that there is content above, so the program has not reached the top. On the contrary, if the
+    program cannot see anything else after scrolling up, it should has reached the top.
+
+    By default, it will try 5 times to scroll up.
+
+    :param scroll_window: the scrollable window position
+    :type: ((left, top), (right, bottom))
+    :param scan_length: the pixels to be scanned as reference
+    :type: int
+    :param try_time: how many times to try before drawing conclusion
+    :type: int
     :return: whether the current page is at the top
     :rtype: Boolean
     """
     # TODO
+    
 
 
-def reach_the_bottom():
+def reach_the_bottom(scroll_window, scan_length, try_time=5):
     """Return whether the current page is at the bottom.
 
     :return: whether the current page is at the bottom

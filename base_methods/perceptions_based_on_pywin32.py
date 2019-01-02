@@ -89,7 +89,7 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
     if full_screen:
         search_window = screen_shot
     else:
-        search_window = screen_shot[top:bottom, left:right]
+        search_window = screen_shot[top: top + bottom, left: left + right]
 
     target = np.array(target_pic)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
 
@@ -145,6 +145,23 @@ def comparing_two_pictures(image_1, image_2):
     res_im = np_im1 - np_im2
     number_of_the_same = res_im.size - np.count_nonzero(res_im)
     return number_of_the_same / res_im.size
+
+
+def screenshot_certain_place(screenshot_window):
+    """Take screenshot from certain area
+
+    :param screenshot_window: the position to take the screenshot
+    :type: ((left, top), (right, bottom))
+    :return: the screenshot
+    :rtype: PIL image file
+    """
+    screen_shot = ImageGrab.grab()
+    screen_shot = np.array(screen_shot)
+
+    ((left, top), (right, bottom)) = screenshot_window
+    result_np = screen_shot[top: top + bottom, left: left + right]
+
+    return Image.fromarray(result_np)
 
 
 # -----------------------------------------For Research Purpose-----------------------------------------
@@ -225,6 +242,9 @@ if __name__ == "__main__":
     # print(search_given_picture_in_area_and_give_pos(target_pic, ((0, 0), (200, 300)), full_screen=True))
     # print("used time:", time.time() - start)
 
-    image1 = Image.open("mouse_hover.png")
-    image2 = Image.open("mouse_hover_fixed.png")
-    print(comparing_two_pictures(image1, image2))
+    # image1 = Image.open("mouse_hover.png")
+    # image2 = Image.open("mouse_hover_fixed.png")
+    # print(comparing_two_pictures(image1, image2))
+
+    im = screenshot_certain_place(((100, 100), (100, 120)))
+    im.show()
