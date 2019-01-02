@@ -1,5 +1,69 @@
 import base_methods.actions_based_on_pywin32 as ac
 import base_methods.perceptions_based_on_pywin32 as pe
+import time
+
+
+def reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
+    """Used to support function reach_the_top and reach_the_bottom. Details could be found in these two functions.
+
+    :param scroll_window: the scrollable window position
+    :type: ((left, top), (right, bottom))
+    :param scan_length: the pixels to be scanned as reference
+    :type: int
+    :param direction: which direction to scroll
+    :type: str, either "up" or "down"
+    :param try_time: how many times to try before drawing conclusion
+    :type: int
+    :return: whether the current page is at the top
+    :rtype: Boolean
+    """
+    if direction != "up" and direction != "down":
+        print("Error: direction not defined")
+        return False
+
+    ((left, top), (right, bottom)) = scroll_window
+    if direction == "up":
+        first_im = pe.screenshot_certain_place(((left, top), (right, top + scan_length)))
+    elif direction == "down":
+        first_im = pe.screenshot_certain_place(((left, bottom - scan_length), (right, bottom)))
+    print(left, top, right, bottom)
+
+    ac.click((right - left) / 2 + left, (bottom - top) / 2 + top)
+    time.sleep(0.01)
+    if direction == "up":
+        ac.scroll("up")
+    elif direction == "down":
+        ac.scroll("down")
+    time.sleep(0.01)
+
+    if direction == "up":
+        second_im = pe.screenshot_certain_place(((left, top), (right, top + scan_length)))
+    elif direction == "down":
+        second_im = pe.screenshot_certain_place(((left, bottom - scan_length), (right, bottom)))
+
+    if first_im == second_im:
+        for i in range(try_time):
+            ac.click((right - left) / 2 + left, (bottom - top) / 2 + top)
+            if direction == "up":
+                ac.scroll("up")
+            elif direction == "down":
+                ac.scroll("down")
+
+            if direction == "up":
+                ith_im = pe.screenshot_certain_place(((left, top), (right, top + scan_length)))
+            elif direction == "down":
+                ith_im = pe.screenshot_certain_place(((left, bottom - scan_length), (right, bottom)))
+
+            if ith_im != first_im:
+                return False
+        return True
+    else:
+        time.sleep(0.1)
+        if direction == "up":
+            ac.scroll("down")
+        elif direction == "down":
+            ac.scroll("up")
+        return False
 
 
 def reach_the_top(scroll_window, scan_length, try_time=5):
@@ -21,20 +85,32 @@ def reach_the_top(scroll_window, scan_length, try_time=5):
     :return: whether the current page is at the top
     :rtype: Boolean
     """
-    # TODO
-    
+    return reach_the_end_core(scroll_window, scan_length, "up", try_time)
 
 
 def reach_the_bottom(scroll_window, scan_length, try_time=5):
-    """Return whether the current page is at the bottom.
+    """Return whether the current page is at the bottom. The user needs to illustrate where is the scrollable window and
+    how many pixels down.
 
+    The function provide the results based on the following operation: first, it tries to scroll down. If the page is
+    then changed, which means that there is content below, so the program has not reached the bottom. On the contrary,
+    if the program cannot see anything else after scrolling down, it should has reached the bottom.
+
+    By default, it will try 5 times to scroll down.
+
+    :param scroll_window: the scrollable window position
+    :type: ((left, top), (right, bottom))
+    :param scan_length: the pixels to be scanned as reference
+    :type: int
+    :param try_time: how many times to try before drawing conclusion
+    :type: int
     :return: whether the current page is at the bottom
     :rtype: Boolean
     """
-    # TODO
+    return reach_the_end_core(scroll_window, scan_length, "down", try_time)
 
 
-def scroll_to_the_end(direction, mode, scroll_bar='', max_wait_time=3):
+def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_time=3):
     """Scroll to either top or bottom of the current page
 
     It can support up to three different scroll methods: mouse_wheel, keyboard and click_and_drag. In click_and_drag
@@ -44,6 +120,8 @@ def scroll_to_the_end(direction, mode, scroll_bar='', max_wait_time=3):
 
     click_and_drag mode is currently not supported.
 
+    :param scroll_window: the scrollable window position
+    :type: ((left, top), (right, bottom))
     :param direction: either up or down
     :type: str, 'up' or 'down'
     :param mode: choose from one of the three modes
@@ -55,6 +133,7 @@ def scroll_to_the_end(direction, mode, scroll_bar='', max_wait_time=3):
     :return: None
     """
     # TODO
+    while reach_the_end_core()
 
 
 def move_mouse_to_match_pic(target_pic, search_box, mouse_start_pos, mouse_stop_pos, full_screen=False):
@@ -165,3 +244,7 @@ def search_given_picture_in_area_and_move_mouse(target_pic, search_area, full_sc
     :rtype: Boolean
     """
     # TODO
+
+
+if __name__ == "__main__":
+    print(reach_the_top(((560, 151), (1896, 717)), 5))

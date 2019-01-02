@@ -23,6 +23,8 @@ def click(x, y):
     :param y: y-axis
     :return: None
     """
+    x = int(x)
+    y = int(y)
     win32api.SetCursorPos((x, y))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
     time.sleep(0.01)
@@ -115,6 +117,7 @@ def press_in_list(press_list, time_list, press_time_list):
     """
     # TODO
 
+
 def set_clipboard(text):
     """Set the clipboard to certain text
 
@@ -126,6 +129,21 @@ def set_clipboard(text):
     win32clipboard.EmptyClipboard()
     win32clipboard.SetClipboardText(text, win32clipboard.CF_UNICODETEXT)
     win32clipboard.CloseClipboard()
+
+
+def scroll(direction):
+    """Scroll up or down
+
+    :param direction: up or down
+    :type: str, either "up" or "down"
+    :return: None
+    """
+    if direction == "up":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 200)
+    elif direction == "down":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -200)
+    else:
+        print("Direction not defined.")
 
 
 if __name__ == "__main__":

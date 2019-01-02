@@ -89,7 +89,7 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
     if full_screen:
         search_window = screen_shot
     else:
-        search_window = screen_shot[top: top + bottom, left: left + right]
+        search_window = screen_shot[top: bottom, left: right]
 
     target = np.array(target_pic)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
 
@@ -159,7 +159,7 @@ def screenshot_certain_place(screenshot_window):
     screen_shot = np.array(screen_shot)
 
     ((left, top), (right, bottom)) = screenshot_window
-    result_np = screen_shot[top: top + bottom, left: left + right]
+    result_np = screen_shot[top: bottom, left: right]
 
     return Image.fromarray(result_np)
 
@@ -239,12 +239,12 @@ if __name__ == "__main__":
 
     # start = time.time()
     # target_pic = Image.open("pic_search_test.png")
-    # print(search_given_picture_in_area_and_give_pos(target_pic, ((0, 0), (200, 300)), full_screen=True))
+    # print(search_given_picture_in_area_and_give_pos(target_pic, ((0, 0), (1920, 1080)), full_screen=False))
     # print("used time:", time.time() - start)
 
     # image1 = Image.open("mouse_hover.png")
     # image2 = Image.open("mouse_hover_fixed.png")
     # print(comparing_two_pictures(image1, image2))
 
-    im = screenshot_certain_place(((100, 100), (100, 120)))
+    im = screenshot_certain_place(((100, 100), (200, 220)))
     im.show()
