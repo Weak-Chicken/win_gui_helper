@@ -15,7 +15,6 @@ from base_methods.__parameters__ import VK_CODE
 import win32clipboard
 import random
 
-
 # Set the screenshot based on the DPI of the client
 user32 = windll.user32
 user32.SetProcessDPIAware()
@@ -71,7 +70,7 @@ def full_screen_checker(name, resolution_x, resolution_y):
 def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture
 
-    This function will search in an area to find the target picture. If any part in this aera is EXACTLY the same with
+    This function will search in an area to find the target picture. If any part in this area is EXACTLY the same with
     the target picture, return the position. Else return None. If full_screen is set to True, this function will ignore
     search area and search the target picture through whole screen.
 
@@ -84,13 +83,32 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
     :return: the position of the picture, or None if not found
     :rtype: ((left, top), (right, bottom)) / None
     """
-    # TODO
+    screen_shot = ImageGrab.grab()
+    screen_shot = np.array(screen_shot)
+    ((left, top), (right, bottom)) = search_area
+    if full_screen:
+        search_window = screen_shot
+    else:
+        search_window = screen_shot[top:bottom, left:right]
+
+    target = np.array(target_pic)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
+
+    for line_index in range(search_window.shape[0]):
+        for pixel_index in range(search_window.shape[1]):
+            if search_window.shape[0] - line_index > target.shape[0] and search_window.shape[1] - pixel_index > target.shape[1]:
+                if (search_window[line_index][pixel_index] == target[0][0]).all():
+                            if (target == search_window[line_index:line_index + target.shape[0],
+                                          pixel_index: pixel_index + target.shape[1]]).all():
+                                return (pixel_index, line_index), (pixel_index + target.shape[1], line_index + target.shape[0])
+    return None
+
+    # TODO Optimize this function. It now needs 3.7s to scan 1920*1080 screen
 
 
 def search_given_picture_in_area(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture
 
-    This function will search in an area to find the target picture. If any part in this aera is EXACTLY the same with
+    This function will search in an area to find the target picture. If any part in this area is EXACTLY the same with
     the target picture, return True. Else return False. If full_screen is set to True, this function will ignore
     search area and search the target picture through whole screen.
 
@@ -103,7 +121,30 @@ def search_given_picture_in_area(target_pic, search_area, full_screen=False):
     :return: whether the picture is in the given area
     :rtype: Boolean
     """
-    # TODO
+    res = search_given_picture_in_area_and_give_pos(target_pic, search_area, full_screen)
+    if res is None:
+        return False
+    else:
+        return True
+
+
+def comparing_two_pictures(image_1, image_2):
+    """Comparing tow pictures and give their similarity.
+
+    :param image_1: the picture to be compared
+    :type: PIL image file
+    :param image_2: the picture to be compared
+    :type: PIL image file
+    :return: similarity, the same points ratio in the picture. Here we define "the same" as the same color in the same
+    place.
+    :rtype: double
+    """
+    np_im1 = np.array(image_1)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
+    np_im2 = np.array(image_2)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
+
+    res_im = np_im1 - np_im2
+    number_of_the_same = res_im.size - np.count_nonzero(res_im)
+    return number_of_the_same / res_im.size
 
 
 # -----------------------------------------For Research Purpose-----------------------------------------
@@ -179,12 +220,11 @@ def save_and_compare_pic(name, size_of_window, scan_position, scan_size):
 if __name__ == "__main__":
     win32api.Beep(3000, 500)
 
-    im_path = 'start_page.png'
-    im = Image.open(im_path)
-    width, height = im.size
-    # 宽高
-    print(im.size, width, height)
-    # 格式，以及格式的详细描述
-    print(im.format, im.format_description)
+    # start = time.time()
+    # target_pic = Image.open("pic_search_test.png")
+    # print(search_given_picture_in_area_and_give_pos(target_pic, ((0, 0), (200, 300)), full_screen=True))
+    # print("used time:", time.time() - start)
 
-    im.show()
+    image1 = Image.open("mouse_hover.png")
+    image2 = Image.open("mouse_hover_fixed.png")
+    print(comparing_two_pictures(image1, image2))

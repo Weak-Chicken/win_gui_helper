@@ -2,6 +2,30 @@ from PIL import ImageGrab, Image
 import numpy as np
 
 
+def all_colors_counts(image_path):
+    """Return all colors  counts in the given image
+
+    :param image_path: the path of image to be detected
+    :type: str
+    :return: the main color and the ratio
+    :rtype: list, each element is in the form of (R, G, B)
+    """
+    im = Image.open(image_path)
+    np_im = np.array(im)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
+    print("input image size:", np_im.shape)
+    colors = {}
+
+    for line in np_im:
+        for pixel in line:
+            color_key = str(pixel[0]) + ',' + str(pixel[1]) + ',' + str(pixel[2])
+            if color_key in colors:
+                colors[color_key] += 1
+            else:
+                colors[color_key] = 1
+
+    return colors
+
+
 def main_color_detect(image_path):
     """Return the main color of given image and its ratio in the whole picture
 
@@ -12,25 +36,18 @@ def main_color_detect(image_path):
     """
     im = Image.open(image_path)
     np_im = np.array(im)
-    print("input image size:", np_im.shape)
-    colors = {}
-
-    for line in np_im:
-        for pixel in line:
-            if str(pixel[0]) + ',' + str(pixel[1]) + ',' + str(pixel[2]) in colors:
-                colors[str(pixel[0]) + ',' + str(pixel[1]) + ',' + str(pixel[2])] += 1
-            else:
-                colors[str(pixel[0]) + ',' + str(pixel[1]) + ',' + str(pixel[2])] = 1
+    colors = all_colors_counts(image_path)
 
     main_color = sorted(colors.items(), key=lambda d: d[1], reverse=True)
     ratio = int(main_color[0][1]) / (np_im.shape[0] * np_im.shape[1])
     return main_color[0][0], ratio
 
 
-def delete_color(original_image_path, result_path, color_to_delete):
-    """Delete one color from the given picture and produce a new picture
+def delete_color(original_image_path, result_path, color_to_delete, show=True, highlight_mode=False):
+    """Delete or highlight one color from the given picture and produce a new picture
 
-    When deleted, the color will be marked as BLACK
+    When deleted, the color will be marked as BLACK. When highlight mode is enabled, the high light color will be marked
+    as WHITE and the rest of the picture will be  marked as BLACK.
 
     :param original_image_path: the picture to be processed
     :type: str
@@ -38,37 +55,34 @@ def delete_color(original_image_path, result_path, color_to_delete):
     :type: str
     :param color_to_delete: the color to be deleted
     :type: (R, G, B)
+    :param show: show the processed picture or not
+    :type: Boolean
+    :param highlight_mode:
     :return: how many pixels in this picture is changed
     :rtype: (number_of_pixels, ratio_of_pixels, total_pixels_in_the_pic)
     """
-    # TODO
     im = Image.open(original_image_path)
-    np_im = np.array(im)
+    np_im = np.array(im)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
     print("input image size:", np_im.shape)
 
-    for line in range(np_im.shape[0]):
-        for pixel in range(np_im.shape[1]):
-            if np_im[line][pixel] == np.array(color_to_delete):
-                pass
+    for line_index in range(np_im.shape[0]):
+        for pixel_index in range(np_im.shape[1]):
+            if (np_im[line_index][pixel_index] == np.array(color_to_delete)).all():
+                if highlight_mode:
+                    np_im[line_index][pixel_index] = np.array((255, 255, 255))
+                else:
+                    np_im[line_index][pixel_index] = np.array((0, 0, 0))
+            else:
+                if highlight_mode:
+                    np_im[line_index][pixel_index] = np.array((0, 0, 0))
 
-
-def highlight_different_color(original_image_path, result_path, color_to_highlight):
-    """Highlight one color from the given picture
-
-    The rest of the picture will be marked as black and high light color will be marked as white.
-
-    :param original_image_path: the picture to be processed
-    :type: str
-    :param result_path: the path to store results
-    :type: str
-    :param color_to_highlight: the color to be highlighted
-    :type: (R, G, B)
-    :return: how many pixels in this picture is changed
-    :rtype: (number_of_pixels, ratio_of_pixels, total_pixels_in_the_pic)
-    """
-    # TODO
+    new_im = Image.fromarray(np_im)
+    new_im.save(result_path)
+    if show:
+        new_im.show()
 
 
 if __name__ == "__main__":
-    # print(main_color_detect("mouse_hover.png"))
-    delete_color("mouse_hover.png", "mouse_hover_fixed.png", (204, 204, 204))
+    print(all_colors_counts("mouse_hover.png"))
+    print(main_color_detect("mouse_hover.png"))
+    delete_color("mouse_hover.png", "mouse_hover_fixed.png", (204, 204, 204), highlight_mode=False)
