@@ -266,8 +266,8 @@ def move_mouse_to_match_pic(target_pic, mouse_start_pos, mouse_stop_pos, full_sc
 
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
     buttons/amines, we need to detect the picture while moving the mouse. The search_box is calculated based on the
-    position of the cursor. It will suppose cursor is at right bottom of the searching box and calculate the search area.
-    The shape of the search box will be the same to the shape of target picture. If the full_screen is set to True, the
+    position of the cursor. It will suppose cursor is at right bottom of the searching box and calculate the search area
+    .The shape of the search box will be the same to the shape of target picture. If the full_screen is set to True, the
     search_box will be disabled and whole screen picture will be searched.
 
     This method will return the similar ratio between the search box and the target picture. So be careful when using
@@ -295,9 +295,10 @@ def move_mouse_to_detect_change(target_ratio, search_area, mouse_start_pos, mous
     In many cases, some buttons or amines will only show when the mouse is passing by specific area. To click on these
     buttons/amines, we need to detect the changes while moving the mouse. The target ratio is the threshold to stop
     moving mouse. Once the changing ratio is higher than given target ratio, the method will return the final changing
-    ratio. The search box is calculated based on the position of the cursor. It will suppose cursor is at right bottom of
-    the searching box and calculate the search area. The shape of the search box will be the same to the shape of target
-    picture. If the full_screen is set to True, the search_box will be disabled and whole screen picture will be searched.
+    ratio. The search box is calculated based on the position of the cursor. It will suppose cursor is at right bottom
+    of the searching box and calculate the search area. The shape of the search box will be the same to the shape of
+    target picture. If the full_screen is set to True, the search_box will be disabled and whole screen picture will be
+    searched.
 
     This method will return the change ratio inside the search box. So be careful when using full_screen parameter. It
     might consider something totally not related but changed stuffs.
@@ -433,6 +434,7 @@ def click_here():
 
     :return: None
     """
+    # TODO Add more modes to this function. Support for other clicks
     _, _, mouse_pos = win32gui.GetCursorInfo()
     ac.click(mouse_pos[0], mouse_pos[1])
 
