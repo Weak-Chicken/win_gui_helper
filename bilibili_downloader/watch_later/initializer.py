@@ -5,7 +5,6 @@ import sys
 #  Set your path here
 cwd_name = "bilibili_downloader"  # the name of the project. set this so the work flow generator can read parameters
 # recursively
-pic_path = "pics"
 working_folder = sys.path[0]
 
 
