@@ -1,3 +1,5 @@
+import importlib
+
 import base_methods.actions_based_on_pywin32 as ac
 import base_methods.perceptions_based_on_pywin32 as pe
 import base_methods.core as core
@@ -6,9 +8,11 @@ import os
 import pickle
 from tqdm import tqdm
 import json
+import sys
+import subprocess
 
 
-INPUT_PARAMETERS = {
+NECESSARY_PARAMETERS = {
     "button_dict": None,  # form in {"button_name": (button_picture_in_PIL_IMAGE_form, pictures_used_to_search_in_PIL_IMAGE_form)}
     "function_list_to_implement": None,  # the functions need to be run after initialization
     "element_size_dict": None,  # form in {"element_name": element_picture_in_PIL_IMAGE_form}
@@ -19,12 +23,32 @@ PRODUCED_PARAMETERS = {
     "element_sizes": {},
 }
 
+CUSTOM_PARAMETERS = {
+
+}
+
 FILE_SAVE_FORMAT = None
 
 # TODO Screen resolution checker
 
 
-def init_working_flow(para_dict, cwd, force_refresh=False, file_save_format="json"):
+def init_working_flow(para_dict, cwd_name, working_folder, force_refresh=False, file_save_format="json"):
+    cwd = working_folder
+    initializers_to_be_executed = []
+
+    while os.path.basename(cwd) != cwd_name:
+        initializers_to_be_executed.append(cwd)
+        cwd = os.path.dirname(cwd)
+    initializers_to_be_executed.append(cwd)
+    initializers_to_be_executed.reverse()
+    initializers_to_be_executed.pop()
+    cwd = working_folder
+
+    for initializer in initializers_to_be_executed:
+        initializer = os.path.join(initializer, "initializer.py")
+        print("executing file: ", initializer)
+        os.system("python " + initializer)
+
     global FILE_SAVE_FORMAT
     FILE_SAVE_FORMAT = file_save_format
 
@@ -33,23 +57,28 @@ def init_working_flow(para_dict, cwd, force_refresh=False, file_save_format="jso
 
         _search_buttons()  # Search buttons
         _measure_element_size()  # Measure element sizes for later use
+    else:
+        print("*******Reading Mode*******")
 
     _run_extra_functions()  # Run any extra function if available
     _save_parameters(cwd)  # Save results
     _print_brief_report()  # Print a brief report to let user know what operations have been down
+    print()
+    print()
 
 
 def _file_check(cwd, force_refresh):
     if force_refresh:
         return False
     global PRODUCED_PARAMETERS
+    global CUSTOM_PARAMETERS
 
     if os.path.isfile(os.path.join(cwd, ".para_temp")):
         if FILE_SAVE_FORMAT == "pickle":
-            PRODUCED_PARAMETERS = pickle.load(open(os.path.join(cwd, ".para_temp"), 'rb'))
+            (PRODUCED_PARAMETERS, CUSTOM_PARAMETERS) = pickle.load(open(os.path.join(cwd, ".para_temp"), 'rb'))
         elif FILE_SAVE_FORMAT == "json":
             with open(os.path.join(cwd, ".para_temp"), 'r') as file:
-                PRODUCED_PARAMETERS = json.loads(file.read())
+                (PRODUCED_PARAMETERS, CUSTOM_PARAMETERS) = json.loads(file.read())
         else:
             raise KeyError("File saving format is not defined")
         return True
@@ -59,19 +88,25 @@ def _file_check(cwd, force_refresh):
 
 def _init_parameters(para_dict):
     global PRODUCED_PARAMETERS
+    global NECESSARY_PARAMETERS
+    global CUSTOM_PARAMETERS
 
-    for parameter in INPUT_PARAMETERS.keys():
+    for parameter in NECESSARY_PARAMETERS.keys():
         if parameter not in para_dict.keys():
-            raise KeyError("You need to define key '{0}' to start initialization")
+            raise KeyError("You need to define key '{0}' to start initialization".format(parameter))
+
+    for parameter in para_dict.keys():
+        if parameter in NECESSARY_PARAMETERS.keys():
+            NECESSARY_PARAMETERS[parameter] = para_dict[parameter]
         else:
-            INPUT_PARAMETERS[parameter] = para_dict[parameter]
+            CUSTOM_PARAMETERS[parameter] = para_dict[parameter]
 
 
 def _search_buttons():
     global PRODUCED_PARAMETERS
-    global INPUT_PARAMETERS
+    global NECESSARY_PARAMETERS
 
-    button_dict = INPUT_PARAMETERS["button_dict"]
+    button_dict = NECESSARY_PARAMETERS["button_dict"]
     for button_name in tqdm(button_dict.keys(), ascii=True, desc="buttons"):
         PRODUCED_PARAMETERS["button_positions"][button_name] = \
             pe.search_given_picture_in_area_and_give_pos(button_dict[button_name][0],
@@ -90,41 +125,47 @@ def _search_buttons():
 
 def _measure_element_size():
     global PRODUCED_PARAMETERS
-    global INPUT_PARAMETERS
+    global NECESSARY_PARAMETERS
 
-    element_dict = INPUT_PARAMETERS["element_size_dict"]
+    element_dict = NECESSARY_PARAMETERS["element_size_dict"]
     for element_name in element_dict.keys():
         PRODUCED_PARAMETERS["element_sizes"][element_name] = element_dict[element_name].size
 
 
 def _run_extra_functions():
-    global INPUT_PARAMETERS
-    if INPUT_PARAMETERS["function_list_to_implement"] is not None:
-        for function in INPUT_PARAMETERS["function_list_to_implement"]:
+    global NECESSARY_PARAMETERS
+    if NECESSARY_PARAMETERS["function_list_to_implement"] is not None:
+        for function in NECESSARY_PARAMETERS["function_list_to_implement"]:
             function()
 
 
 def _save_parameters(cwd):
     global PRODUCED_PARAMETERS
     global FILE_SAVE_FORMAT
+    global CUSTOM_PARAMETERS
 
     if FILE_SAVE_FORMAT == "pickle":
-        pickle.dump(PRODUCED_PARAMETERS, open(os.path.join(cwd, ".para_temp"), 'wb'))
+        pickle.dump((PRODUCED_PARAMETERS, CUSTOM_PARAMETERS), open(os.path.join(cwd, ".para_temp"), 'wb'))
     elif FILE_SAVE_FORMAT == "json":
         with open(os.path.join(cwd, ".para_temp"), 'w') as file:
-            file.write(json.dumps(PRODUCED_PARAMETERS))
+            file.write(json.dumps((PRODUCED_PARAMETERS, CUSTOM_PARAMETERS)))
     else:
         raise KeyError("File saving format is not defined")
 
 
 def _print_brief_report():
     global PRODUCED_PARAMETERS
-    global INPUT_PARAMETERS
+    global NECESSARY_PARAMETERS
+    global CUSTOM_PARAMETERS
 
     print("===================Produced parameters involved in the init are:===================")
     for key, value in PRODUCED_PARAMETERS.items():
         print('{key}:{value}'.format(key=key, value=value))
 
+    print("===================Customized parameters involved in the init are:===================")
+    for key, value in CUSTOM_PARAMETERS.items():
+        print('{key}:{value}'.format(key=key, value=value))
+
     print("===================Input parameters involved in the init are:===================")
-    for key, value in INPUT_PARAMETERS.items():
+    for key, value in NECESSARY_PARAMETERS.items():
         print('{key}:{value}'.format(key=key, value=value))
