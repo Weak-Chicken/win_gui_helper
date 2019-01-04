@@ -330,7 +330,7 @@ def move_mouse_to_detect_change(target_ratio, search_area, mouse_start_pos, mous
 
     top = start_y - size_y
     if top < 0:
-        return 0
+        return FLAG_ERROR_NAN_COORDINATE, FLAG_ERROR_NAN_COORDINATE, 0
     bottom = start_y
 
     # Start
@@ -405,28 +405,55 @@ def move_mouse_to_detect_change_only_two_points(search_area, direction='left', f
     :param full_screen: directly search the whole screen
     :type: Boolean
     :return: the similarity ratio if anything inside the search box has changed
-    :rtype: double
+    :rtype: double / None
     """
     _, _, mouse_start_pos = win32gui.GetCursorInfo()
     mouse_stop_pos = list(mouse_start_pos)
+    mouse_start_pos = list(mouse_start_pos)
     if direction == "left":
         mouse_stop_pos[0] -= 1
+        mouse_start_pos[0] -= 2
     elif direction == "right":
         mouse_stop_pos[0] += 1
     elif direction == "up":
         mouse_stop_pos[1] -= 1
+        mouse_start_pos[1] -= 2
     elif direction == "down":
         mouse_stop_pos[1] += 1
     else:
         raise ValueError("Given direction {0} is not defined".format(direction))
 
-    res = move_mouse_to_detect_change(0, search_area, mouse_start_pos, mouse_stop_pos, full_screen)
-    win32api.SetCursorPos(mouse_stop_pos)
+    # Init
+    start_x, start_y = mouse_start_pos
+    start_x = int(start_x)
+    start_y = int(start_y)
 
-    if res[0] != FLAG_ERROR_NAN_COORDINATE and res[1] != FLAG_ERROR_NAN_COORDINATE:
-        return res[2]
-    else:
+    (size_x, size_y) = search_area
+
+    top = start_y - size_y
+    if top < 0:
         return None
+    bottom = start_y
+    left = start_x - size_x
+    if left < 0:
+        return None
+    right = start_x
+
+    if full_screen:
+        screen_shot = pe.ImageGrab.grab()
+        search_window_1 = np.array(screen_shot)
+    else:
+        screen_shot = pe.ImageGrab.grab((left, top, right, bottom))
+        search_window_1 = np.array(screen_shot)
+    win32api.SetCursorPos(mouse_stop_pos)
+    if full_screen:
+        screen_shot = pe.ImageGrab.grab()
+        search_window_2 = np.array(screen_shot)
+    else:
+        screen_shot = pe.ImageGrab.grab((left, top, right, bottom))
+        search_window_2 = np.array(screen_shot)
+
+    return pe.comparing_two_pictures(search_window_1, search_window_2)
 
 
 def click_here():

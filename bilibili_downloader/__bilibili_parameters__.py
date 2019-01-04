@@ -1,8 +1,13 @@
 from PIL import Image
 
+# ====================================================path operation====================================================
+import os
+cwd = os.getcwd()
+while os.path.basename(cwd) != "bilibili_downloader":
+    cwd = os.path.dirname(cwd)
 
 # ====================================================load pictures=====================================================
-im_mouse_hover = Image.open("pics/mouse_hover.png")
+im_mouse_hover = Image.open(os.path.join(cwd, "pics", "mouse_hover.png"))
 
 # ====================================================layout related====================================================
 SCREEN_RESOLUTION = (1920, 1080)
@@ -13,8 +18,8 @@ MAX_LINES_DISPLAYED_NOT_EFFECTED = 4
 
 
 # Auto calculated. No need for modifying
-BOTTOM_LINE_EPISODE_CENTER = (BOTTOM_LINE_EPISODE_LOWER_BOUNDARY - BOTTOM_LINE_EPISODE_UPPER_BOUNDARY) / 2 \
-                             + BOTTOM_LINE_EPISODE_UPPER_BOUNDARY
+BOTTOM_LINE_EPISODE_CENTER = int((BOTTOM_LINE_EPISODE_LOWER_BOUNDARY - BOTTOM_LINE_EPISODE_UPPER_BOUNDARY) / 2
+                                 + BOTTOM_LINE_EPISODE_UPPER_BOUNDARY)
 
 SINGLE_EPISODE_SIZE = im_mouse_hover.size
 

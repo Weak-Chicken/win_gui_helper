@@ -99,7 +99,10 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
                 if (search_window[line_index][pixel_index] == target[0][0]).all():
                             if (target == search_window[line_index:line_index + target.shape[0],
                                           pixel_index: pixel_index + target.shape[1]]).all():
-                                return (pixel_index, line_index), (pixel_index + target.shape[1], line_index + target.shape[0])
+                                if full_screen:
+                                    return (pixel_index, line_index), (pixel_index + target.shape[1], line_index + target.shape[0])
+                                else:
+                                    return (left + pixel_index, top + line_index), (left + pixel_index + target.shape[1], top + line_index + target.shape[0])
     return None
 
     # TODO Optimize this function. It now needs 3.7s to scan 1920*1080 screen
