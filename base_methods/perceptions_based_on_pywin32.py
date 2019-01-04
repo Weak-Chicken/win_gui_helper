@@ -67,7 +67,7 @@ def full_screen_checker(name, resolution_x, resolution_y):
         return False
 
 
-def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_screen=False):
+def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_screen=False, debug_mode=False, debug_pic=None):
     """Search in given area to find target picture
 
     This function will search in an area to find the target picture. If any part in this area is EXACTLY the same with
@@ -83,8 +83,14 @@ def search_given_picture_in_area_and_give_pos(target_pic, search_area, full_scre
     :return: the position of the picture, or None if not found
     :rtype: ((left, top), (right, bottom)) / None
     """
-    screen_shot = ImageGrab.grab()
-    screen_shot = np.array(screen_shot)
+    # TODO Finish the comments
+    if debug_mode:
+        screen_shot = debug_pic
+        if debug_pic is None:
+            raise ValueError("Missing debug picture")
+    else:
+        screen_shot = ImageGrab.grab()
+    screen_shot = np.array(screen_shot)[:, :, :3]  # sometimes PNG files can have 4 channels, which are not needed here
     ((left, top), (right, bottom)) = search_area
     if full_screen:
         search_window = screen_shot

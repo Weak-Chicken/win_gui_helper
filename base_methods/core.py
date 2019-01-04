@@ -8,6 +8,8 @@ import base_methods.perceptions_based_on_pywin32 as pe
 import time
 from base_methods.__parameters__ import FLAG_ERROR_NAN_COORDINATE
 
+# TODO Create a debug mode for following functions
+
 
 def _reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
     """Used to support function reach_the_top and reach_the_bottom. Details could be found in these two functions.
@@ -469,7 +471,7 @@ def click_here():
 def search_given_picture_in_area_and_move_mouse_to(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture and move cursor to there if the picture is found
 
-    This function will search in an area to find the target picture. If any part in this aera is EXACTLY the same with
+    This function will search in an area to find the target picture. If any part in this area is EXACTLY the same with
     the target picture, return True. Else return False. If full_screen is set to True, this function will ignore
     search area and search the target picture through whole screen. Besides, if the picture is found, move the cursor
     to the middle of the found picture.
