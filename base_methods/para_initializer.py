@@ -25,14 +25,28 @@ CUSTOM_PARAMETERS = {
 
 }
 
+
+# Register for extra functions input/output parameters
+FUNCTION_INPUT_PARAMETER = {
+    "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
+    "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
+    "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
+}
+
+FUNCTION_OUTPUT_PARAMETER = {
+    "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
+    "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
+    "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
+}
+
 FILE_SAVE_FORMAT = None
 
 
 # TODO Screen resolution checker
 
 
-def init_working_flow(para_dict, cwd_name, working_folder, force_refresh=False, file_save_format="json",
-                      pic_path="pics", button_path="buttons", element_path="elements", compared_pic_path="be_compared"):
+def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, file_save_format="json",
+                    pic_path="pics", button_path="buttons", element_path="elements", compared_pic_path="be_compared"):
     # Init
     cwd = working_folder
     initializers_to_be_executed = []
@@ -72,6 +86,10 @@ def init_working_flow(para_dict, cwd_name, working_folder, force_refresh=False, 
     # For readability
     print()
     print()
+
+
+def read_parameters():
+    pass
 
 
 def _file_check(cwd, force_refresh):
@@ -190,9 +208,12 @@ def _measure_element_size():
 
 def _run_extra_functions():
     global NECESSARY_PARAMETERS
+    global FUNCTION_OUTPUT_PARAMETER
+    global FUNCTION_INPUT_PARAMETER
+
     if NECESSARY_PARAMETERS["function_list_to_implement"] is not None:
         for function in NECESSARY_PARAMETERS["function_list_to_implement"]:
-            function()
+            FUNCTION_OUTPUT_PARAMETER = function(FUNCTION_INPUT_PARAMETER)
 
 
 def _save_parameters(cwd):

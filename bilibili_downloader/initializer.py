@@ -34,4 +34,4 @@ para_dict = {
 }
 
 if __name__ == "__main__":
-    gh.working_flow.init_working_flow(para_dict, cwd_name, working_folder)
+    gh.para_initializer.init_parameters(para_dict, cwd_name, working_folder)
