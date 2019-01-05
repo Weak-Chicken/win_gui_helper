@@ -1,11 +1,12 @@
 import base_methods as gh
+from bilibili_downloader.__bilibili_parameters__ import *
 import os
 import sys
 
 from PIL import Image
 
 #  Set your path here
-cwd_name = "bilibili_downloader"  # the name of the project. set this so the work flow generator can read parameters
+cwd_name = PROJECT_NAME  # the name of the project. set this so the work flow generator can read parameters
 # recursively
 working_folder = sys.path[0]
 

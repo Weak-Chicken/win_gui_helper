@@ -5,27 +5,26 @@ import base_methods as gh
 from PIL import ImageGrab, Image
 from bilibili_downloader.__bilibili_parameters__ import *
 import time
+import sys
+from base_methods.para_initializer import read_parameters
 
 # ====================================================path operation====================================================
 import os
 cwd = os.getcwd()
-while os.path.basename(cwd) != "bilibili_downloader":
+while os.path.basename(cwd) != PROJECT_NAME:
     cwd = os.path.dirname(cwd)
+
+cwd_name = PROJECT_NAME
+working_folder = sys.path[0]
+
+PRODUCED_PARAMETERS, CUSTOM_PARAMETERS = read_parameters(cwd_name, working_folder)
 
 #  ======================================================parameters=====================================================
 threshold_change_ratio_for_episode = 0.1
 
-(cursor_x, cursor_y) = (SCREEN_RESOLUTION[0] - 20, BOTTOM_LINE_EPISODE_LOWER_BOUNDARY - 20)
-win32api.SetCursorPos((cursor_x, cursor_y))
 
 #  ======================================================variables======================================================
-watch_later_start_picture = Image.open(os.path.join(cwd, "watch_later", "pics", "start_page.png"))
-download_button = Image.open(os.path.join(cwd, "pics", "download_button.png"))
-select_all_button = Image.open(os.path.join(cwd, "pics", "select_all_button.png"))
-confirm_button = Image.open(os.path.join(cwd, "pics", "confirm_button.png"))
-start_download_button = Image.open(os.path.join(cwd, "pics", "start_download_button.png"))
-download_page = Image.open(os.path.join(cwd, "pics", "download_page.png"))
-back_button = Image.open(os.path.join(cwd, "pics", "back_button.png"))
+watch_later_start_picture = Image.open(os.path.join(working_folder, "pics", "dynamic_searching", "start_page.png"))
 
 
 #  ======================================================functions======================================================

@@ -10,15 +10,22 @@ from tqdm import tqdm
 import json
 from PIL import Image
 
+# dict key names
+button_dict = "button_dict"
+function_list_to_implement = "function_list_to_implement"
+element_size_dict = "element_size_dict"
 NECESSARY_PARAMETERS = {
-    "button_dict": None, # form in {"button_name": (button_picture_in_PIL_IMAGE_form, pictures_used_to_search_in_PIL_IMAGE_form)}
-    "function_list_to_implement": None,  # the functions need to be run after initialization
-    "element_size_dict": None,  # form in {"element_name": element_picture_in_PIL_IMAGE_form}
+    button_dict: None,  # form in {"button_name": (button_picture_in_PIL_IMAGE_form, pictures_used_to_search_in_PIL_IMAGE_form)}
+    function_list_to_implement: None,  # the functions need to be run after initialization
+    element_size_dict: None,  # form in {"element_name": element_picture_in_PIL_IMAGE_form}
 }
 
+# dict key names
+button_positions = "button_positions"
+element_sizes = "element_sizes"
 PRODUCED_PARAMETERS = {
-    "button_positions": {},
-    "element_sizes": {},
+    button_positions: {},
+    element_sizes: {},
 }
 
 CUSTOM_PARAMETERS = {
@@ -28,12 +35,6 @@ CUSTOM_PARAMETERS = {
 
 # Register for extra functions input/output parameters
 FUNCTION_INPUT_PARAMETER = {
-    "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
-    "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
-    "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
-}
-
-FUNCTION_OUTPUT_PARAMETER = {
     "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
     "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
     "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
@@ -88,8 +89,48 @@ def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, fi
     print()
 
 
-def read_parameters():
-    pass
+def read_parameters(cwd_name, working_folder, file_save_format="json"):
+    global FILE_SAVE_FORMAT
+    global PRODUCED_PARAMETERS
+    global CUSTOM_PARAMETERS
+    FILE_SAVE_FORMAT = file_save_format
+
+    cwd = working_folder
+    paras_to_be_read = []
+
+    while os.path.basename(cwd) != cwd_name:
+        paras_to_be_read.append(cwd)
+        cwd = os.path.dirname(cwd)
+    paras_to_be_read.append(cwd)
+    paras_to_be_read.reverse()
+
+    temp_produced_parameters = {}
+    temp_custom_parameters = {}
+
+    for cwd in paras_to_be_read:
+        if _file_check(cwd, force_refresh=False):
+            temp_produced_parameters = _merge_two_global_dict(temp_produced_parameters, PRODUCED_PARAMETERS)
+            temp_custom_parameters = _merge_two_global_dict(temp_custom_parameters, CUSTOM_PARAMETERS)
+
+    PRODUCED_PARAMETERS = temp_produced_parameters
+    CUSTOM_PARAMETERS = temp_custom_parameters
+
+    return PRODUCED_PARAMETERS, CUSTOM_PARAMETERS
+
+
+def _merge_two_global_dict(dict_1, dict_2):
+    for key in dict_2.keys():
+        if type(dict_2[key]) == dict:
+            if key in dict_1.keys():
+                dict_1[key].update(dict_2[key])
+            else:
+                dict_1[key] = dict_2[key]
+        elif type(PRODUCED_PARAMETERS[key]) == list:
+            dict_1[key] += dict_2[key]
+        else:
+            dict_1[key] = dict_2[key]
+
+    return dict_1
 
 
 def _file_check(cwd, force_refresh):
@@ -153,7 +194,7 @@ def _search_button_pics(working_folder, pic_path, button_path, compared_pic_path
     for i in range(len(buttons)):
         button = buttons[i]
         ref = compared_pics[i]
-        NECESSARY_PARAMETERS["button_dict"][button[:button.find(".")]] = \
+        NECESSARY_PARAMETERS[button_dict][button[:button.find(".")]] = \
             (Image.open(os.path.join(button_pics_path, button)),
              Image.open(os.path.join(compared_pics_path, ref)))
 
@@ -172,7 +213,7 @@ def _search_element_pics(working_folder, pic_path, element_path):
 
     global NECESSARY_PARAMETERS
     for element in elements:
-        NECESSARY_PARAMETERS["element_size_dict"][element[:element.find(".")]] = \
+        NECESSARY_PARAMETERS[element_size_dict][element[:element.find(".")]] = \
             Image.open(os.path.join(element_pics_path, element))
 
 
@@ -180,40 +221,39 @@ def _search_buttons():
     global PRODUCED_PARAMETERS
     global NECESSARY_PARAMETERS
 
-    button_dict = NECESSARY_PARAMETERS["button_dict"]
-    for button_name in tqdm(button_dict.keys(), ascii=True, desc="buttons"):
-        PRODUCED_PARAMETERS["button_positions"][button_name] = \
-            pe.search_given_picture_in_area_and_give_pos(button_dict[button_name][0],
+    temp_button_dict = NECESSARY_PARAMETERS[button_dict]
+    for button_name in tqdm(temp_button_dict.keys(), ascii=True, desc="buttons"):
+        PRODUCED_PARAMETERS[button_positions][button_name] = \
+            pe.search_given_picture_in_area_and_give_pos(temp_button_dict[button_name][0],
                                                          ((0, 0), (1920, 1080)),
                                                          full_screen=True,
                                                          debug_mode=True,
-                                                         debug_pic=button_dict[button_name][1])
-        if PRODUCED_PARAMETERS["button_positions"][button_name] is None:
+                                                         debug_pic=temp_button_dict[button_name][1])
+        if PRODUCED_PARAMETERS[button_positions][button_name] is None:
             print(""""button {0} cannot be found in the screenshot. Now please open your image editor to give the value
              manually.""".format(button_name))
             ((left, top), (right, bottom)) = \
                 input("The position of button {0} is (Please in the format like ((left, top), (right, bottom)) ): ".
                       format(button_name))
-            PRODUCED_PARAMETERS["button_positions"][button_name] = ((left, top), (right, bottom))
+            PRODUCED_PARAMETERS[button_positions][button_name] = ((left, top), (right, bottom))
 
 
 def _measure_element_size():
     global PRODUCED_PARAMETERS
     global NECESSARY_PARAMETERS
 
-    element_dict = NECESSARY_PARAMETERS["element_size_dict"]
+    element_dict = NECESSARY_PARAMETERS[element_size_dict]
     for element_name in element_dict.keys():
-        PRODUCED_PARAMETERS["element_sizes"][element_name] = element_dict[element_name].size
+        PRODUCED_PARAMETERS[element_sizes][element_name] = element_dict[element_name].size
 
 
 def _run_extra_functions():
     global NECESSARY_PARAMETERS
-    global FUNCTION_OUTPUT_PARAMETER
     global FUNCTION_INPUT_PARAMETER
 
-    if NECESSARY_PARAMETERS["function_list_to_implement"] is not None:
-        for function in NECESSARY_PARAMETERS["function_list_to_implement"]:
-            FUNCTION_OUTPUT_PARAMETER = function(FUNCTION_INPUT_PARAMETER)
+    if NECESSARY_PARAMETERS[function_list_to_implement] is not None:
+        for function in NECESSARY_PARAMETERS[function_list_to_implement]:
+            function(FUNCTION_INPUT_PARAMETER)
 
 
 def _save_parameters(cwd):

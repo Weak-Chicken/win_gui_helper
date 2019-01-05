@@ -1,11 +1,12 @@
 from bilibili_downloader.watch_later.translator import *
 
+
 set_focus_to_bilibili_app("哔哩哔哩动画")
-time.sleep(0.5)
+time.sleep(0.1)
 if find_pic(watch_later_start_picture):
     scroll_to_the_bottom()
 
-    win32api.Beep(3000, 500)
+    win32api.Beep(3000, 100)
     while not reach_the_top(((0, 115), (1920, 1080)), 20):
         download_one_line()
         go_to_upper_line()

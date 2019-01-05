@@ -468,6 +468,12 @@ def click_here():
     ac.click(mouse_pos[0], mouse_pos[1])
 
 
+def click_center_of_a_picture(area):
+    # TODO Add more modes to this function. Support for other clicks
+    ((left, top), (right, bottom)) = area
+    ac.click((int((right - left) / 2 + left), int((bottom - top) / 2 + top)))
+
+
 def search_given_picture_in_area_and_move_mouse_to(target_pic, search_area, full_screen=False):
     """Search in given area to find target picture and move cursor to there if the picture is found
 
