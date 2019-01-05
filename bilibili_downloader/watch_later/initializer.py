@@ -11,15 +11,22 @@ working_folder = sys.path[0]
 
 
 #  Write your customized functions here. Remember to register them later in function_list_to_implement
-def calculate_each_episode_poistion(state):
-    pos_left_top = state["PRODUCED_PARAMETERS"]["pos_left_top"]
-    pos_right_bottom = state["PRODUCED_PARAMETERS"]["pos_right_bottom"]
-    episode_size = state["PRODUCED_PARAMETERS"]["single_episode"]
-    pointer_right_bottom = pos_right_bottom
+def calculate_each_episode_position(state):
+    pos_left_top = state["PRODUCED_PARAMETERS"]["button_positions"]["pos_left_top"]
+    pos_right_bottom = state["PRODUCED_PARAMETERS"]["button_positions"]["pos_right_bottom"]
+    episode_size = state["PRODUCED_PARAMETERS"]["element_sizes"]["single_episode"]
+    pointer_right_bottom = list(pos_right_bottom[1])
+    all_episode_positions = []
 
-    while pointer_right_bottom[1][0] >= pos_left_top[1][0]:  # pointer_right_bottom below the left top
-        while pointer_right_bottom[1][1] >= pos_left_top[1][1]:  # pointer_right_bottom is on the right side of the left column
+    colunm_num = (pos_right_bottom[1][0] - pos_left_top[0][0]) / episode_size[0]
+    row_num = (pos_right_bottom[1][1] - pos_left_top[0][1]) / episode_size[1]
 
+    while pointer_right_bottom[0] >= pos_left_top[1][0]:  # pointer_right_bottom below the left top
+        while pointer_right_bottom[1] >= pos_left_top[1][1]:  # pointer_right_bottom is on the right side of the left column
+            pointer_left_top = pointer_right_bottom
+            pointer_left_top[0] -= episode_size[0]
+            pointer_left_top[1] -= episode_size[1]
+            all_episode_positions.append((pointer_left_top, pointer_right_bottom))
 
     state["CUSTOM_PARAMETERS"]
 
@@ -29,7 +36,7 @@ button_dict = {
 }  # buttons
 
 function_list_to_implement = [
-    calculate_each_episode_poistion
+    # calculate_each_episode_position
 ]  # functions to run after init process
 
 element_size_dict = {
@@ -43,4 +50,4 @@ para_dict = {
 }
 
 if __name__ == "__main__":
-    gh.para_initializer.init_parameters(para_dict, cwd_name, working_folder)
+    gh.para_initializer.init_parameters(para_dict, cwd_name, working_folder, True)

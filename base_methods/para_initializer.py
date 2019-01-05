@@ -49,7 +49,9 @@ FILE_SAVE_FORMAT = None
 def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, file_save_format="json",
                     pic_path="pics", button_path="buttons", element_path="elements", compared_pic_path="be_compared"):
     # Init
+    print(os.getcwd())
     cwd = working_folder
+    print("working folder", working_folder)
     initializers_to_be_executed = []
 
     while os.path.basename(cwd) != cwd_name:
