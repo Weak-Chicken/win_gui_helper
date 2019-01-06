@@ -48,6 +48,36 @@ FILE_SAVE_FORMAT = None
 
 def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, file_save_format="json",
                     pic_path="pics", button_path="buttons", element_path="elements", compared_pic_path="be_compared"):
+    """Call this function in initializers so that the parameters needed can be refreshed and loaded. This is the main
+    function of the para_initializer file.
+
+
+    :param para_dict: all parameters to be loaded. There are some of parameters are necessary, which must be included.
+    If not, an error gonna be raised.
+    :type para_dict: dict
+    :param cwd_name: the name of the project. Since this function will be called recursively, this name will be the sign
+    to stop.
+    :type cwd_name: str
+    :param working_folder: the path of the file which is now called.
+    :type working_folder: str
+    :param force_refresh: If set true, the function will re-generate all parameters even if the parameters have been
+    generated
+    :type force_refresh: bool
+    :param file_save_format: which format to use when saving parameters
+    :type file_save_format: str
+    :param pic_path: the path to read all pictures
+    :type pic_path: str
+    :param button_path: the path to read button pictures
+    :type button_path: str
+    :param element_path: the path to read element pictures (elements are those to be measured sizes)
+    :type element_path: str
+    :param compared_pic_path: the path to read pictures which are used for comparing or searching (or, in other words,
+    the pictures which contains buttons and etc.)
+    :type compared_pic_path: str
+    :return: None
+    :rtype: None
+    """
+    # TODO improve this comment
     # Init
     print(os.getcwd())
     cwd = working_folder
