@@ -25,6 +25,7 @@ def _reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
     :return: whether the current page is at the top
     :rtype: Boolean
     """
+    # TODO Modify to support scroll length setting
     if direction != "up" and direction != "down":
         print("Error: direction not defined")
         return False
@@ -41,7 +42,7 @@ def _reach_the_end_core(scroll_window, scan_length, direction, try_time=5):
         ac.scroll("up")
     elif direction == "down":
         ac.scroll("down")
-    time.sleep(0.01)
+    time.sleep(0.3)
 
     if direction == "up":
         second_im = pe.screenshot_certain_place(((left, top), (right, top + scan_length)))
@@ -139,19 +140,22 @@ def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_ti
     :type: int
     :return: None
     """
-    step = 20
+    step = 10
     for i in range(max_wait_time):
         while not _reach_the_end_core(scroll_window, 8, direction):
             if mode == "mouse_wheel":
                 for j in range(step):
                     ac.scroll(direction)
+                    time.sleep(0.4)
             elif mode == "keyboard":
                 if direction == "down":
                     for j in range(step):
                         ac.press("down_arrow")
+                        time.sleep(0.4)
                 elif direction == "up":
                     for j in range(step):
                         ac.press("up_arrow")
+                        time.sleep(0.4)
             else:
                 print("Error: Given mode is not supported currently")
             time.sleep(0.1)

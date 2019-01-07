@@ -18,10 +18,10 @@ def calculate_each_episode_position(state):
     pointer_right_bottom = list(pos_right_bottom[1])
     all_episode_positions = []
 
-    colunm_num = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / episode_size[0])
+    column_num = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / episode_size[0])
     row_num = int((pos_right_bottom[1][1] - pos_left_top[0][1]) / episode_size[1])
     large_episode_size_vertical = int((pos_right_bottom[1][1] - pos_left_top[0][1]) / row_num)
-    large_episode_size_horizontal = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / colunm_num)
+    large_episode_size_horizontal = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / column_num)
     large_episode_size = (large_episode_size_horizontal, large_episode_size_vertical)
 
     while pointer_right_bottom[1] >= pos_left_top[1][1]:  # pointer_right_bottom below the left top
@@ -35,6 +35,9 @@ def calculate_each_episode_position(state):
         pointer_right_bottom[0] = list(pos_right_bottom[1])[0]
 
     state["CUSTOM_PARAMETERS"]["episode_positions"] = all_episode_positions
+    state["CUSTOM_PARAMETERS"]["large_episode_size"] = large_episode_size
+    state["CUSTOM_PARAMETERS"]["column_num"] = column_num
+    state["CUSTOM_PARAMETERS"]["row_num"] = row_num
 
 
 #  Write settings in this file. Run this file to initialize for the app

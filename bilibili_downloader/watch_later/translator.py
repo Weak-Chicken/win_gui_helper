@@ -7,6 +7,7 @@ from bilibili_downloader.__bilibili_parameters__ import *
 import time
 import sys
 from base_methods.para_initializer import read_parameters
+from base_methods.__parameters__ import VK_CODE
 
 # ====================================================path operation====================================================
 import os
@@ -20,7 +21,11 @@ working_folder = sys.path[0]
 PRODUCED_PARAMETERS, CUSTOM_PARAMETERS = read_parameters(cwd_name, working_folder)
 
 #  ======================================================parameters=====================================================
-threshold_change_ratio_for_episode = 0.1
+back_button = PRODUCED_PARAMETERS["button_positions"]["back_button"]
+confirm_button = PRODUCED_PARAMETERS["button_positions"]["confirm_button"]
+download_button = PRODUCED_PARAMETERS["button_positions"]["download_button"]
+select_all_button = PRODUCED_PARAMETERS["button_positions"]["select_all_button"]
+start_download_button = PRODUCED_PARAMETERS["button_positions"]["start_download_button"]
 
 
 #  ======================================================variables======================================================
@@ -48,37 +53,91 @@ def scroll_to_the_bottom():
 reach_the_top = gh.complexac.reach_the_top
 
 
-def download_one_page():
-    def click_and_wait(picture, wait_time=0.5, try_times=3):
-        try_counts = 0
-        while gh.complexac.take_action_to_detect_change(
-                ((0, 0), (1920, 1080)),
-                gh.complexac.click_center_of_a_picture,
-                wait_time,
-                True,
-                picture) > 0.845:
-            try_counts += 1
-            print("counting!")
-            if try_counts >= try_times:
-                print("action {0} with parameters {1} not found and being escaped".format(
-                    "click_center_of_a_picture", picture))
-                return -1
-        return 0
+def click_and_wait(picture, wait_time=0.8, try_times=3):
+    try_counts = 0
+    similarity = gh.complexac.take_action_to_detect_change(
+        ((0, 0), (1920, 1080)),
+        gh.complexac.click_center_of_a_picture,
+        wait_time,
+        True,
+        picture)
+    while similarity > 0.94:
+        try_counts += 1
+        print("counting!", similarity)
+        if try_counts >= try_times:
+            print("action {0} with parameters {1} not found and being escaped".format(
+                "click_center_of_a_picture", picture))
+            return -1
+    return 0
 
-    back_button = PRODUCED_PARAMETERS["button_positions"]["back_button"]
-    confirm_button = PRODUCED_PARAMETERS["button_positions"]["confirm_button"]
-    download_button = PRODUCED_PARAMETERS["button_positions"]["download_button"]
-    select_all_button = PRODUCED_PARAMETERS["button_positions"]["select_all_button"]
-    start_download_button = PRODUCED_PARAMETERS["button_positions"]["start_download_button"]
-    for episode in CUSTOM_PARAMETERS["episode_positions"]:
-        if click_and_wait(episode) == -1:
+
+def download_one_line(cursor_pos=None):
+    if cursor_pos is None:
+        while win32api.GetKeyState(VK_CODE["enter"]) >= 0:
+            time.sleep(0.1)
+
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
+
+    if cursor_pos is None:
+        episode = list(win32api.GetCursorPos())
+    else:
+        episode = cursor_pos
+
+    pos_left_top = PRODUCED_PARAMETERS["button_positions"]["pos_left_top"][0]
+
+    while episode[0] > pos_left_top[0]:
+        episode_copy = episode
+        if click_and_wait((episode, episode_copy)) == -1:
             continue
 
         if click_and_wait(download_button) == -1:
             click_and_wait(back_button)
             continue
-        if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((1040, 1020), (1920, 1080))):
+        if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080))):
             click_and_wait(select_all_button)
             click_and_wait(confirm_button)
         click_and_wait(start_download_button)
         click_and_wait(back_button)
+        episode[0] -= CUSTOM_PARAMETERS["large_episode_size"][0]
+
+    win32api.SetCursorPos((1920, 540))
+    episode[0] += CUSTOM_PARAMETERS["large_episode_size"][0] * CUSTOM_PARAMETERS["column_num"]
+    return episode
+
+
+def download_one_rest(cursor_pos):
+    if cursor_pos is None:
+        while win32api.GetKeyState(VK_CODE["enter"]) >= 0:
+            time.sleep(0.1)
+
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
+    win32api.Beep(3000, 100)
+
+    if cursor_pos is None:
+        episode = list(win32api.GetCursorPos())
+    else:
+        episode = cursor_pos
+
+    episode[1] -= CUSTOM_PARAMETERS["large_episode_size"][1]
+    pos_left_top = PRODUCED_PARAMETERS["button_positions"]["pos_left_top"][0]
+
+    while episode[1] > pos_left_top[1]:
+        while episode[0] > pos_left_top[0]:
+            episode_copy = episode
+            if click_and_wait((episode, episode_copy)) == -1:
+                continue
+
+            if click_and_wait(download_button) == -1:
+                click_and_wait(back_button)
+                continue
+            if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080))):
+                click_and_wait(select_all_button)
+                click_and_wait(confirm_button)
+            click_and_wait(start_download_button)
+            click_and_wait(back_button)
+            episode[0] -= CUSTOM_PARAMETERS["large_episode_size"][0]
+        episode[0] += CUSTOM_PARAMETERS["large_episode_size"][0] * CUSTOM_PARAMETERS["column_num"]
+        episode[1] -= CUSTOM_PARAMETERS["large_episode_size"][1]

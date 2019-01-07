@@ -139,9 +139,9 @@ def scroll(direction):
     :return: None
     """
     if direction == "up":
-        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 200)
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 50)
     elif direction == "down":
-        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -200)
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -50)
     else:
         print("Direction not defined.")
 
@@ -157,6 +157,15 @@ def scroll_one(direction):
         win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 1)
     elif direction == "down":
         win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1)
+    else:
+        print("Direction not defined.")
+
+
+def scroll_custom(direction, length):
+    if direction == "up":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, length)
+    elif direction == "down":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -length)
     else:
         print("Direction not defined.")
 

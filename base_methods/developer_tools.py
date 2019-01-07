@@ -1,5 +1,14 @@
 from PIL import ImageGrab, Image
 import numpy as np
+import base_methods.actions_based_on_pywin32 as ac
+import base_methods.perceptions_based_on_pywin32 as pe
+import base_methods.core as core
+from base_methods.__parameters__ import VK_CODE
+
+import win32gui
+import win32api
+import win32con
+import time
 
 
 def all_colors_counts(image_path):
@@ -82,7 +91,23 @@ def delete_color(original_image_path, result_path, color_to_delete, show=True, h
         new_im.show()
 
 
+def measure_scroll_units(start_step=137):
+    step = start_step
+    while win32api.GetKeyState(VK_CODE["esc"]) >= 0:  # Button down = 0 or 1. Button up = -127 or -128
+        if win32api.GetKeyState(VK_CODE["w"]) < 0:
+            step += 1
+            win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, step)
+            print(step)
+        if win32api.GetKeyState(VK_CODE["s"]) < 0:
+            step -= 1
+            win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, step)
+            print(step)
+        time.sleep(0.2)
+    print("final step ", step)
+
+
 if __name__ == "__main__":
-    print(all_colors_counts("mouse_hover.png"))
-    print(main_color_detect("mouse_hover.png"))
-    delete_color("mouse_hover.png", "mouse_hover_fixed.png", (204, 204, 204), highlight_mode=False)
+    # print(all_colors_counts("mouse_hover.png"))
+    # print(main_color_detect("mouse_hover.png"))
+    # delete_color("mouse_hover.png", "mouse_hover_fixed.png", (204, 204, 204), highlight_mode=False)
+    measure_scroll_units()
