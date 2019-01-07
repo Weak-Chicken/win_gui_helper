@@ -36,7 +36,7 @@ button_dict = {
 }  # buttons
 
 function_list_to_implement = [
-    # calculate_each_episode_position
+    calculate_each_episode_position
 ]  # functions to run after init process
 
 element_size_dict = {

@@ -40,6 +40,12 @@ FUNCTION_INPUT_PARAMETER = {
     "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
 }
 
+PRINT_PARAMETER_COPY = {
+    "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
+    "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
+    "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
+}
+
 FILE_SAVE_FORMAT = None
 
 
@@ -111,6 +117,16 @@ def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, fi
         _measure_element_size()  # Measure element sizes for later use
     else:
         print("*******Reading Mode*******")
+
+    # Combine all levels parameters
+    if os.getcwd() == working_folder:
+        read_parameters(cwd_name, working_folder, file_save_format)
+        global FUNCTION_INPUT_PARAMETER
+        FUNCTION_INPUT_PARAMETER = {
+            "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
+            "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
+            "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
+        }  # Refresh para dict
 
     _run_extra_functions()  # Run any extra function if available
     _save_parameters(cwd)  # Save results
@@ -303,18 +319,16 @@ def _save_parameters(cwd):
 
 
 def _print_brief_report():
-    global PRODUCED_PARAMETERS
-    global NECESSARY_PARAMETERS
-    global CUSTOM_PARAMETERS
+    global PRINT_PARAMETER_COPY
 
     print("===================Produced parameters involved in the init are:===================")
-    for key, value in PRODUCED_PARAMETERS.items():
+    for key, value in PRINT_PARAMETER_COPY["PRODUCED_PARAMETERS"].items():
         print('{key}:{value}'.format(key=key, value=value))
 
     print("===================Customized parameters involved in the init are:===================")
-    for key, value in CUSTOM_PARAMETERS.items():
+    for key, value in PRINT_PARAMETER_COPY["CUSTOM_PARAMETERS"].items():
         print('{key}:{value}'.format(key=key, value=value))
 
     print("===================Input parameters involved in the init are:===================")
-    for key, value in NECESSARY_PARAMETERS.items():
+    for key, value in PRINT_PARAMETER_COPY["NECESSARY_PARAMETERS"].items():
         print('{key}:{value}'.format(key=key, value=value))
