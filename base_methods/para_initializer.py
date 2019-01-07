@@ -1,3 +1,4 @@
+import copy
 import importlib
 
 import base_methods.actions_based_on_pywin32 as ac
@@ -35,12 +36,6 @@ CUSTOM_PARAMETERS = {
 
 # Register for extra functions input/output parameters
 FUNCTION_INPUT_PARAMETER = {
-    "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
-    "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
-    "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
-}
-
-PRINT_PARAMETER_COPY = {
     "NECESSARY_PARAMETERS": NECESSARY_PARAMETERS,
     "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
     "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
@@ -85,9 +80,7 @@ def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, fi
     """
     # TODO improve this comment
     # Init
-    print(os.getcwd())
     cwd = working_folder
-    print("working folder", working_folder)
     initializers_to_be_executed = []
 
     while os.path.basename(cwd) != cwd_name:
@@ -119,6 +112,12 @@ def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, fi
         print("*******Reading Mode*******")
 
     # Combine all levels parameters
+    global NECESSARY_PARAMETERS
+    global PRODUCED_PARAMETERS
+    global CUSTOM_PARAMETERS
+
+    temp_necessary_parameters = copy.deepcopy(NECESSARY_PARAMETERS)
+    temp_produced_parameters = copy.deepcopy(PRODUCED_PARAMETERS)
     if os.getcwd() == working_folder:
         read_parameters(cwd_name, working_folder, file_save_format)
         global FUNCTION_INPUT_PARAMETER
@@ -127,8 +126,10 @@ def init_parameters(para_dict, cwd_name, working_folder, force_refresh=False, fi
             "PRODUCED_PARAMETERS": PRODUCED_PARAMETERS,
             "CUSTOM_PARAMETERS": CUSTOM_PARAMETERS,
         }  # Refresh para dict
-
     _run_extra_functions()  # Run any extra function if available
+    NECESSARY_PARAMETERS = temp_necessary_parameters
+    PRODUCED_PARAMETERS = temp_produced_parameters
+
     _save_parameters(cwd)  # Save results
     _print_brief_report()  # Print a brief report to let user know what operations have been down
 
@@ -173,8 +174,11 @@ def _merge_two_global_dict(dict_1, dict_2):
                 dict_1[key].update(dict_2[key])
             else:
                 dict_1[key] = dict_2[key]
-        elif type(PRODUCED_PARAMETERS[key]) == list:
-            dict_1[key] += dict_2[key]
+        elif type(dict_2[key]) == list:
+            if key in dict_1.keys():
+                dict_1[key] += dict_2[key]
+            else:
+                dict_1[key] = dict_2[key]
         else:
             dict_1[key] = dict_2[key]
 
@@ -319,16 +323,18 @@ def _save_parameters(cwd):
 
 
 def _print_brief_report():
-    global PRINT_PARAMETER_COPY
+    global PRODUCED_PARAMETERS
+    global CUSTOM_PARAMETERS
+    global NECESSARY_PARAMETERS
 
     print("===================Produced parameters involved in the init are:===================")
-    for key, value in PRINT_PARAMETER_COPY["PRODUCED_PARAMETERS"].items():
+    for key, value in PRODUCED_PARAMETERS.items():
         print('{key}:{value}'.format(key=key, value=value))
 
     print("===================Customized parameters involved in the init are:===================")
-    for key, value in PRINT_PARAMETER_COPY["CUSTOM_PARAMETERS"].items():
+    for key, value in CUSTOM_PARAMETERS.items():
         print('{key}:{value}'.format(key=key, value=value))
 
     print("===================Input parameters involved in the init are:===================")
-    for key, value in PRINT_PARAMETER_COPY["NECESSARY_PARAMETERS"].items():
+    for key, value in NECESSARY_PARAMETERS.items():
         print('{key}:{value}'.format(key=key, value=value))

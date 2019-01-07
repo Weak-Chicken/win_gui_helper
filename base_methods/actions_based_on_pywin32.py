@@ -146,6 +146,21 @@ def scroll(direction):
         print("Direction not defined.")
 
 
+def scroll_one(direction):
+    """Scroll up or down one unit
+
+    :param direction: up or down
+    :type: str, either "up" or "down"
+    :return: None
+    """
+    if direction == "up":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 1)
+    elif direction == "down":
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1)
+    else:
+        print("Direction not defined.")
+
+
 if __name__ == "__main__":
     win32api.Beep(3000, 100)
     win32api.Beep(3000, 100)

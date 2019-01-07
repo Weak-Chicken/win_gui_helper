@@ -154,6 +154,7 @@ def scroll_to_the_end(scroll_window, direction, mode, scroll_bar='', max_wait_ti
                         ac.press("up_arrow")
             else:
                 print("Error: Given mode is not supported currently")
+            time.sleep(0.1)
 
 
 def move_mouse_to_match_pic_res_in_list(target_pic, mouse_start_pos, mouse_stop_pos, full_screen=False, find_mode=False,
@@ -471,7 +472,7 @@ def click_here():
 def click_center_of_a_picture(area):
     # TODO Add more modes to this function. Support for other clicks
     ((left, top), (right, bottom)) = area
-    ac.click((int((right - left) / 2 + left), int((bottom - top) / 2 + top)))
+    ac.click(int((right - left) / 2 + left), int((bottom - top) / 2 + top))
 
 
 def search_given_picture_in_area_and_move_mouse_to(target_pic, search_area, full_screen=False):
@@ -500,6 +501,27 @@ def search_given_picture_in_area_and_move_mouse_to(target_pic, search_area, full
         return True
 
 
+def take_action_to_detect_change(search_area, action_function, wait_time, full_screen, *args):
+    ((left, top), (right, bottom)) = search_area
+    if full_screen:
+        search_window_1 = pe.ImageGrab.grab()
+    else:
+        search_window_1 = pe.ImageGrab.grab((left, top, right, bottom))
+    search_window_1 = np.array(search_window_1)
+
+    action_function(*args)
+
+    time.sleep(wait_time)
+
+    if full_screen:
+        search_window_2 = pe.ImageGrab.grab()
+    else:
+        search_window_2 = pe.ImageGrab.grab((left, top, right, bottom))
+    search_window_2 = np.array(search_window_2)
+
+    return pe.comparing_two_pictures(search_window_1, search_window_2)
+
+
 if __name__ == "__main__":
     # print(reach_the_bottom(((560, 151), (1896, 717)), 5))
     # scroll_to_the_end(((560, 151), (1896, 717)), "up", "keyboard")
@@ -519,5 +541,13 @@ if __name__ == "__main__":
 
     # click_here()
 
-    target = pe.Image.open("test_button.png")
-    print(search_given_picture_in_area_and_move_mouse_to(target, ((0, 0), (100, 300)), full_screen=True))
+    # target = pe.Image.open("test_button.png")
+    # print(search_given_picture_in_area_and_move_mouse_to(target, ((0, 0), (100, 300)), full_screen=True))
+
+    # click_center_of_a_picture(((0, 0), (1920, 1080)))
+
+    def testfunc(para_1, para_2):
+        print(para_1)
+        print("===")
+        print(para_2)
+    print(take_action_to_detect_change(((0, 0), (1920, 1080)), testfunc, True, 6, 2))

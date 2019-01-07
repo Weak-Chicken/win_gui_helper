@@ -18,17 +18,24 @@ def calculate_each_episode_position(state):
     pointer_right_bottom = list(pos_right_bottom[1])
     all_episode_positions = []
 
-    colunm_num = (pos_right_bottom[1][0] - pos_left_top[0][0]) / episode_size[0]
-    row_num = (pos_right_bottom[1][1] - pos_left_top[0][1]) / episode_size[1]
+    colunm_num = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / episode_size[0])
+    row_num = int((pos_right_bottom[1][1] - pos_left_top[0][1]) / episode_size[1])
+    large_episode_size_vertical = int((pos_right_bottom[1][1] - pos_left_top[0][1]) / row_num)
+    large_episode_size_horizontal = int((pos_right_bottom[1][0] - pos_left_top[0][0]) / colunm_num)
+    large_episode_size = (large_episode_size_horizontal, large_episode_size_vertical)
 
-    while pointer_right_bottom[0] >= pos_left_top[1][0]:  # pointer_right_bottom below the left top
-        while pointer_right_bottom[1] >= pos_left_top[1][1]:  # pointer_right_bottom is on the right side of the left column
-            pointer_left_top = pointer_right_bottom
-            pointer_left_top[0] -= episode_size[0]
-            pointer_left_top[1] -= episode_size[1]
-            all_episode_positions.append((pointer_left_top, pointer_right_bottom))
+    while pointer_right_bottom[1] >= pos_left_top[1][1]:  # pointer_right_bottom below the left top
+        while pointer_right_bottom[0] >= pos_left_top[1][0]:  # pointer_right_bottom is on the right side of the left column
+            pointer_left_top = pointer_right_bottom.copy()
+            pointer_left_top[0] -= large_episode_size[0]
+            pointer_left_top[1] -= large_episode_size[1]
+            all_episode_positions.append((pointer_left_top.copy(), pointer_right_bottom.copy()))
+            pointer_right_bottom[0] -= large_episode_size[0]
+        pointer_right_bottom[1] -= large_episode_size[1]
+        pointer_right_bottom[0] = list(pos_right_bottom[1])[0]
 
-    state["CUSTOM_PARAMETERS"]
+    state["CUSTOM_PARAMETERS"]["episode_positions"] = all_episode_positions
+
 
 #  Write settings in this file. Run this file to initialize for the app
 button_dict = {
@@ -50,4 +57,4 @@ para_dict = {
 }
 
 if __name__ == "__main__":
-    gh.para_initializer.init_parameters(para_dict, cwd_name, working_folder, True)
+    gh.para_initializer.init_parameters(para_dict, cwd_name, working_folder)
