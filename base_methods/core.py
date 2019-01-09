@@ -526,6 +526,9 @@ def take_action_to_detect_change(search_area, action_function, wait_time, full_s
     return pe.comparing_two_pictures(search_window_1, search_window_2)
 
 
+# TODO precise comparision of two pictures
+
+
 if __name__ == "__main__":
     # print(reach_the_bottom(((560, 151), (1896, 717)), 5))
     # scroll_to_the_end(((560, 151), (1896, 717)), "up", "keyboard")

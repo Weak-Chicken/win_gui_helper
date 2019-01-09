@@ -29,7 +29,6 @@ start_download_button = PRODUCED_PARAMETERS["button_positions"]["start_download_
 
 
 #  ======================================================variables======================================================
-watch_later_start_picture = Image.open(os.path.join(working_folder, "pics", "dynamic_searching", "start_page.png"))
 select_all_button_picture = Image.open(os.path.join(cwd, "pics", "buttons", "select_all_button.png"))
 
 
@@ -61,7 +60,7 @@ def click_and_wait(picture, wait_time=0.8, try_times=3):
         wait_time,
         True,
         picture)
-    while similarity > 0.975:
+    while similarity > 0.985:
         try_counts += 1
         print("counting!", similarity)
         if try_counts >= try_times:
