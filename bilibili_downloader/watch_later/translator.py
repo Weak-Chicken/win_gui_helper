@@ -61,7 +61,7 @@ def click_and_wait(picture, wait_time=0.8, try_times=3):
         wait_time,
         True,
         picture)
-    while similarity > 0.94:
+    while similarity > 0.975:
         try_counts += 1
         print("counting!", similarity)
         if try_counts >= try_times:
@@ -120,8 +120,7 @@ def download_one_rest(cursor_pos):
         episode = list(win32api.GetCursorPos())
     else:
         episode = cursor_pos
-
-    episode[1] -= CUSTOM_PARAMETERS["large_episode_size"][1]
+        episode[1] -= CUSTOM_PARAMETERS["large_episode_size"][1]
     pos_left_top = PRODUCED_PARAMETERS["button_positions"]["pos_left_top"][0]
 
     while episode[1] > pos_left_top[1]:

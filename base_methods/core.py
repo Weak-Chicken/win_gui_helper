@@ -554,4 +554,4 @@ if __name__ == "__main__":
         print(para_1)
         print("===")
         print(para_2)
-    print(take_action_to_detect_change(((0, 0), (1920, 1080)), testfunc, True, 6, 2))
+    print(take_action_to_detect_change(((0, 0), (1920, 1080)), testfunc, 1, True, 6, 3))

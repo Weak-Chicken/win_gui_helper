@@ -4,7 +4,7 @@ from bilibili_downloader.watch_later.translator import *
 set_focus_to_bilibili_app("哔哩哔哩动画")
 time.sleep(0.1)
 # if find_pic(watch_later_start_picture):
-scroll_to_the_bottom()
+# scroll_to_the_bottom()
 
 cursor_pos = None
 while not reach_the_top(((0, 115), (1920, 1080)), 20):
@@ -15,6 +15,8 @@ while not reach_the_top(((0, 115), (1920, 1080)), 20):
     gh.basicac.scroll_custom("up", 138)
     win32api.Beep(3000, 100)
     time.sleep(0.2)
+
+win32api.Beep(3000, 500)
 
 download_one_rest(cursor_pos)
 
