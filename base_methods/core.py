@@ -528,6 +528,8 @@ def take_action_to_detect_change(search_area, action_function, wait_time, full_s
 
 # TODO precise comparision of two pictures
 
+# TODO add searching pictures with similarity ratio
+
 
 if __name__ == "__main__":
     # print(reach_the_bottom(((560, 151), (1896, 717)), 5))

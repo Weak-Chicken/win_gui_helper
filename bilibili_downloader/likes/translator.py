@@ -96,7 +96,7 @@ def download_one_line(cursor_pos=None):
             click_and_wait(back_button)
             continue
         print("download clicked")
-        if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080)), full_screen=True):
+        if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080))):
             print("multi-epi found")
             click_and_wait(select_all_button)
             print("select all clicked")
@@ -141,8 +141,7 @@ def download_one_rest(cursor_pos):
                 click_and_wait(back_button)
                 continue
             print("download clicked")
-            if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080)),
-                                                       full_screen=True):
+            if gh.basicpe.search_given_picture_in_area(select_all_button_picture, ((900, 900), (1920, 1080))):
                 print("multi-epi found")
                 click_and_wait(select_all_button)
                 print("select all clicked")
