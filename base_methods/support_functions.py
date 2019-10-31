@@ -30,9 +30,13 @@ def array_pooling(array, kernel_size, stride, mode="max_pooling"):
         return np.nan
 
     step_x, step_y = stride
-    array = np.pad(array,
+    if step_x != 0 and step_y != 0:
+        array = np.pad(array,
                    ((0, (array.shape[0] - kernel_size[0]) % step_x), (0, (array.shape[1] - kernel_size[1]) % step_y)),
                    'constant', constant_values=(0, 0))
+    else:
+        step_x = 1
+        step_y = 1
     result = []
 
     for i in range(0, array.shape[0] - kernel_size[0] + 1, step_x):
